@@ -1,0 +1,26 @@
+{
+  "name": "sathix-scraper-engine",
+  "version": "0.1.0",
+  "description": "Scraper engine for SathiX OS - crawler framework",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "dependencies": {
+    "axios": "^1.4.0",
+    "puppeteer": "^21.0.0",
+    "cheerio": "^1.0.0-rc.12",
+    "pdf-parse": "^1.1.1",
+    "@prisma/client": "^5.11.0"
+  },
+  "devDependencies": {
+    "prisma": "^5.11.0"
+  },
+  "optionalDependencies": {
+    "bullmq": "^2.14.0",
+    "ioredis": "^5.3.2"
+  }
+  "engines": {
+    "node": ">=16"
+  }
+}
