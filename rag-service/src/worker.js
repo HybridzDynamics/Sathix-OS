@@ -1,7 +1,7 @@
-const queue = require('./src/infrastructure/queue/inMemoryQueue');
-const { embedDocument } = require('./src/application/services/embeddingService');
-const autoEmbedUsecase = require('./src/application/usecases/autoEmbedUsecase');
-const logger = require('./src/infrastructure/logging/logger');
+const queue = require('./infrastructure/queue/inMemoryQueue');
+const { embedDocument } = require('./application/services/embeddingService');
+const autoEmbedUsecase = require('./application/usecases/autoEmbedUsecase');
+const logger = require('./infrastructure/logging/logger');
 
 async function runWorker() {
   logger.info('embed worker starting');

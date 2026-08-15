@@ -1,0 +1,36 @@
+{
+  "activeTranslationModel": "indictrans2-dist-200m",
+  "models": {
+    "indictrans2-dist-200m": {
+      "id": "indictrans2-dist-200m",
+      "name": "AI4Bharat IndicTrans2 Distilled 200M",
+      "version": "1.0.0",
+      "provider": "indictrans2",
+      "task": "translation",
+      "baseModel": "ai4bharat/indictrans2-en-indic-dist-200M",
+      "supportedLanguages": [
+        "en", "hi", "bn", "ta", "te", "mr", "gu", "kn", "ml", "or",
+        "pa", "as", "ur", "ne", "sa", "sd", "ks", "kok", "mai", "sat",
+        "doi", "mni", "brx"
+      ],
+      "fineTuned": false,
+      "license": "CC-BY-NC-4.0 / AI4Bharat IndicTrans2 License",
+      "huggingfaceRepo": {
+        "en-indic": "ai4bharat/indictrans2-en-indic-dist-200M",
+        "indic-en": "ai4bharat/indictrans2-indic-en-dist-200M",
+        "indic-indic": "ai4bharat/indictrans2-indic-indic-dist-200M"
+      }
+    },
+    "sathix-indictrans2-finetuned": {
+      "id": "sathix-indictrans2-finetuned",
+      "name": "SathiX Fine-Tuned Government IndicTrans2",
+      "version": "1.0.0-draft",
+      "provider": "indictrans2",
+      "task": "translation",
+      "baseModel": "indictrans2-dist-200m",
+      "supportedLanguages": ["en", "hi", "ta", "bn", "mr", "te"],
+      "fineTuned": true,
+      "domain": "government-schemes"
+    }
+  }
+}

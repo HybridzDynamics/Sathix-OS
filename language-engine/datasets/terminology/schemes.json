@@ -1,0 +1,55 @@
+{
+  "PM-KISAN": {
+    "canonicalName": "Pradhan Mantri Kisan Samman Nidhi",
+    "aliases": ["PM Kisan", "PM-Kisan", "पीएम किसान", "PMKISAN", "pm-kisan"],
+    "translations": {
+      "hi": "प्रधानमंत्री किसान सम्मान निधि",
+      "ta": "பிரதம மந்திரி கிசான் சம்மான் நிதி",
+      "bn": "প্রধানমন্ত্রী কিষাণ সম্মান নিধি",
+      "te": "ప్రధాన మంత్రి కిసాన్ సమ్మాన్ నిధి",
+      "mr": "प्रधानमंत्री किसान सन्मान निधी",
+      "gu": "પ્રધાનમંત્રી કિસાન સન્માન નિધિ",
+      "kn": "ಪ್ರಧಾನ ಮಂತ್ರಿ ಕಿಸಾನ್ ಸಮ್ಮಾನ್ ನಿಧಿ",
+      "ml": "പ്രധാനമന്ത്രി കിസാൻ സമ്മാൻ നിധി",
+      "pa": "ਪ੍ਰਧਾਨ ਮੰਤਰੀ ਕਿਸਾਨ ਸੰਮਾਨ ਨਿਧੀ",
+      "or": "ପ୍ରଧାନମନ୍ତ୍ରୀ କିଷାନ ସମ୍ମାନ ନିଧି"
+    }
+  },
+  "PMAY": {
+    "canonicalName": "Pradhan Mantri Awas Yojana",
+    "aliases": ["PM Awas Yojana", "PMAY-G", "PMAY-U", "पीएम आवास योजना", "PM Awas"],
+    "translations": {
+      "hi": "प्रधानमंत्री आवास योजना",
+      "ta": "பிரதம மந்திரி ஆவாஸ் யோஜனா",
+      "bn": "প্রধানমন্ত্রী আবাস যোজনা",
+      "te": "ప్రధాన మంత్రి ఆవాస్ యోజన",
+      "mr": "प्रधानमंत्री आवास योजना"
+    }
+  },
+  "MGNREGA": {
+    "canonicalName": "Mahatma Gandhi National Rural Employment Guarantee Act",
+    "aliases": ["NREGA", "MNREGA", "मनरेगा", "100 days work scheme"],
+    "translations": {
+      "hi": "महात्मा गांधी राष्ट्रीय ग्रामीण रोजगार गारंटी अधिनियम (मनरेगा)",
+      "ta": "மகாத்மா காந்தி தேசிய ஊரக வேலை உறுதித் திட்டம்",
+      "bn": "মহাত্মা গান্ধী জাতীয় গ্রামীণ কর্মসংস্থান নিশ্চয়তা আইন"
+    }
+  },
+  "PM-JAY": {
+    "canonicalName": "Ayushman Bharat Pradhan Mantri Jan Arogya Yojana",
+    "aliases": ["Ayushman Bharat", "PMJAY", "आयुष्मान भारत", "Golden Card"],
+    "translations": {
+      "hi": "आयुष्मान भारत प्रधानमंत्री जन आरोग्य योजना",
+      "ta": "ஆயுஷ்மான் பாரத் பிரதம மந்திரி ஜன் ஆரோக்கிய திட்டம்",
+      "bn": "আয়ুষ্মান ভারত প্রধানমন্ত্রী জন আরোগ্য যোজনা"
+    }
+  },
+  "PM-SVANidhi": {
+    "canonicalName": "PM Street Vendor's AtmaNirbhar Nidhi",
+    "aliases": ["PMSVANidhi", "PM Svanidhi", "पीएम स्वनिधि", "Street Vendor Loan"],
+    "translations": {
+      "hi": "पीएम स्ट्रीट वेंडर्स आत्मनिर्भर निधि (पीएम स्वनिधि)",
+      "ta": "பிஎம் ஸ்வாநிதி திட்டம்"
+    }
+  }
+}

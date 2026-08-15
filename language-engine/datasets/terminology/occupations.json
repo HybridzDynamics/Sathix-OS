@@ -1,0 +1,25 @@
+{
+  "Small and Marginal Farmer": {
+    "aliases": ["Small Farmer", "Marginal Farmer", "लघु एवं सीमांत किसान", "chote kisan"],
+    "translations": {
+      "hi": "लघु एवं सीमांत किसान",
+      "ta": "சிறு மற்றும் குறு விவசாயிகள்",
+      "bn": "ক্ষুদ্র ও প্রান্তিক কৃষক"
+    }
+  },
+  "Street Vendor": {
+    "aliases": ["Hawker", "फेरीवाला", "ठेलेवाला", "Vendor"],
+    "translations": {
+      "hi": "स्ट्रीट वेंडर (फेरीवाला / पथ विक्रेता)",
+      "ta": "தெருவோர வியாபாரி",
+      "bn": "পথ বিক্রেতা"
+    }
+  },
+  "Construction Worker": {
+    "aliases": ["Nirman Shramik", "निर्माण श्रमिक", "Daily Wage Worker", "Mazdoor"],
+    "translations": {
+      "hi": "निर्माण श्रमिक (मजदूर)",
+      "ta": "கட்டுமானத் தொழிலாளி"
+    }
+  }
+}

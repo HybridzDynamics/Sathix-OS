@@ -1,0 +1,27 @@
+{
+  "Ministry of Agriculture and Farmers Welfare": {
+    "aliases": ["Ministry of Agriculture", "कृषि मंत्रालय", "Agriculture Dept"],
+    "translations": {
+      "hi": "कृषि एवं किसान कल्याण मंत्रालय",
+      "ta": "வேளாண்மை மற்றும் விவசாயிகள் நல அமைச்சகம்",
+      "bn": "কৃষি ও কৃষক কল্যাণ মন্ত্রক",
+      "te": "వ్యవసాయం మరియు రైతుల సంక్షేమ మంత్రిత్వ శాఖ"
+    }
+  },
+  "Ministry of Rural Development": {
+    "aliases": ["Rural Development Ministry", "ग्रामीण विकास मंत्रालय"],
+    "translations": {
+      "hi": "ग्रामीण विकास मंत्रालय",
+      "ta": "ஊரக வளர்ச்சி அமைச்சகம்",
+      "bn": "পল্লী উন্নয়ন মন্ত্রক"
+    }
+  },
+  "Ministry of Health and Family Welfare": {
+    "aliases": ["Health Ministry", "स्वास्थ्य मंत्रालय", "MoHFW"],
+    "translations": {
+      "hi": "स्वास्थ्य एवं परिवार कल्याण मंत्रालय",
+      "ta": "சுகாதாரம் மற்றும் குடும்ப நல அமைச்சகம்",
+      "bn": "স্বাস্থ্য ও পরিবার কল্যাণ মন্ত্রক"
+    }
+  }
+}

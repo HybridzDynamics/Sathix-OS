@@ -13,33 +13,31 @@ const { getPrisma } = require('./prismaClient');
  */
 async function saveRecord(record) {
   const prisma = getPrisma();
-  const data = Object.assign({}, record, {
-    attachments: record.attachments || null,
-    meta: record.meta || null
-  });
+  
+  // Clean up object for Prisma to ensure we don't pass undefined where null is expected
+  const cleanData = {
+    id: record.id,
+    name: record.name,
+    description: record.description,
+    department: record.department,
+    category: record.category,
+    state: record.state,
+    eligibility: record.eligibility,
+    benefits: record.benefits,
+    documentsRequired: record.documentsRequired,
+    applicationLink: record.applicationLink,
+    sourceUrl: record.sourceUrl
+  };
 
   // Use prisma.upsert to ensure idempotency
   const saved = await prisma.scheme.upsert({
-    where: { id: data.id },
+    where: { id: cleanData.id },
     update: {
-      url: data.url,
-      title: data.title,
-      summary: data.summary,
-      content: data.content,
-      source: data.source,
-      attachments: data.attachments,
-      meta: data.meta,
+      ...cleanData,
       updatedAt: new Date()
     },
     create: {
-      id: data.id,
-      url: data.url,
-      title: data.title,
-      summary: data.summary,
-      content: data.content,
-      source: data.source,
-      attachments: data.attachments,
-      meta: data.meta
+      ...cleanData
     }
   });
 

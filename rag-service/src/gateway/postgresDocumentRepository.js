@@ -4,32 +4,46 @@ const config = require('../config');
 const pool = new Pool({ connectionString: config.DATABASE_URL });
 
 // Helper to try multiple table name variants (Prisma model may map differently)
-const TABLE_CANDIDATES = ['schemes', 'scheme', 'Scheme', 'Scheme'.toLowerCase()];
+// Prisma by default creates a table named exactly as the model, case-sensitive.
+// In Postgres, unquoted identifiers are lowercased. Prisma quotes them so "Scheme" != scheme.
+const TABLE_CANDIDATES = ['"Scheme"', 'scheme', '"scheme"', '"schemes"', 'schemes'];
 
 async function resolveTable(client) {
-  // Try a list of common candidates and return the first that exists
+  // Try each candidate with a lightweight existence check
   for (const t of TABLE_CANDIDATES) {
-    const q = `SELECT to_regclass($1) as exists`;
-    const res = await client.query(q, [t]);
-    if (res.rows[0] && res.rows[0].exists) return t;
+    try {
+      const res = await client.query(`SELECT 1 FROM ${t} LIMIT 0`);
+      return t; // If we get here, the table exists
+    } catch {
+      // table doesn't exist under this name, try next
+    }
   }
-  // fallback: try information_schema search for 'scheme' in table_name
-  const res = await client.query("SELECT table_name FROM information_schema.tables WHERE table_name ILIKE '%scheme%' LIMIT 1");
-  if (res.rows[0]) return res.rows[0].table_name;
+  // Last resort: information_schema search
+  const res = await client.query("SELECT table_name FROM information_schema.tables WHERE table_schema='public' AND table_name ILIKE '%scheme%' LIMIT 1");
+  if (res.rows[0]) return `"${res.rows[0].table_name}"`;
   throw new Error('Could not locate schemes table in database');
 }
 
 function mapRowToDocument(row) {
   return {
     id: row.id,
-    title: row.title || row.url || null,
-    summary: row.summary || null,
-    content: row.content || row.body || null,
-    source: row.source || null,
+    title: row.name || row.title || row.url || null,
+    summary: row.description || row.summary || null,
+    content: row.description || row.content || row.body || null,
+    source: row.sourceUrl || row.sourceurl || row.source || null,
     attachments: row.attachments || null,
-    meta: row.meta || null,
-    createdAt: row.createdat || row.created_at || row.createdAt || null,
-    updatedAt: row.updatedat || row.updated_at || row.updatedAt || null
+    meta: row.meta || {
+      state: row.state,
+      category: row.category,
+      department: row.department,
+      eligibility: row.eligibility,
+      benefits: row.benefits,
+      documentsRequired: row.documentsRequired || row.documentsrequired,
+      applicationLink: row.applicationLink || row.applicationlink,
+      sourceUrl: row.sourceUrl || row.sourceurl
+    },
+    createdAt: row.createdAt || row.createdat || row.created_at || null,
+    updatedAt: row.updatedAt || row.updatedat || row.updated_at || null
   };
 }
 
@@ -38,7 +52,7 @@ module.exports = {
     const client = await pool.connect();
     try {
       const table = await resolveTable(client);
-      const q = `SELECT id, url, title, summary, content, source, attachments, meta, createdat, updatedat FROM ${table} ORDER BY createdat ASC LIMIT $1`;
+      const q = `SELECT * FROM ${table} ORDER BY "createdAt" ASC LIMIT $1`;
       const res = await client.query(q, [limit]);
       return res.rows.map(mapRowToDocument);
     } finally {
@@ -50,7 +64,7 @@ module.exports = {
     const client = await pool.connect();
     try {
       const table = await resolveTable(client);
-      const res = await client.query(`SELECT id, url, title, summary, content, source, attachments, meta, createdat, updatedat FROM ${table} WHERE id = $1`, [id]);
+      const res = await client.query(`SELECT * FROM ${table} WHERE id = $1`, [id]);
       if (!res.rows[0]) return null;
       return mapRowToDocument(res.rows[0]);
     } finally {
@@ -65,7 +79,7 @@ module.exports = {
       let offset = 0;
       while (true) {
         const res = await client.query(
-          `SELECT id, url, title, summary, content, source, attachments, meta, createdat, updatedat FROM ${table} ORDER BY createdat ASC LIMIT $1 OFFSET $2`,
+          `SELECT * FROM ${table} ORDER BY "createdAt" ASC LIMIT $1 OFFSET $2`,
           [batchSize, offset]
         );
         if (!res.rows.length) break;
@@ -83,7 +97,7 @@ module.exports = {
     const client = await pool.connect();
     try {
       const table = await resolveTable(client);
-      const q = `SELECT id, url, title, summary, content, source, attachments, meta, createdat, updatedat FROM ${table} WHERE (updatedat >= $1 OR createdat >= $1) ORDER BY GREATEST(updatedat, createdat) ASC LIMIT $2`;
+      const q = `SELECT * FROM ${table} WHERE ("updatedAt" >= $1 OR "createdAt" >= $1) ORDER BY GREATEST("updatedAt", "createdAt") ASC LIMIT $2`;
       const res = await client.query(q, [threshold, limit]);
       return res.rows.map(mapRowToDocument);
     } finally {

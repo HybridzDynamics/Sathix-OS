@@ -1,5 +1,6 @@
 const repo = require('../../gateway/postgresDocumentRepository');
 const queue = require('../../infrastructure/queue/inMemoryQueue');
+const logger = require('../../infrastructure/logging/logger');
 
 let lastCheckedAt = new Date(0);
 

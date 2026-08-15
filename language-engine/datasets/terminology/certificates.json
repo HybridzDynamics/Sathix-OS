@@ -1,0 +1,41 @@
+{
+  "Income Certificate": {
+    "aliases": ["Aay Praman Patra", "आय प्रमाण पत्र", "Income Proof"],
+    "translations": {
+      "hi": "आय प्रमाण पत्र",
+      "ta": "வருமானச் சான்றிதழ்",
+      "bn": "আয় প্রশংসাপত্র",
+      "te": "ఆదాయ ధృవీకరణ పత్రం"
+    }
+  },
+  "Caste Certificate": {
+    "aliases": ["Jati Praman Patra", "जाति प्रमाण पत्र", "Community Certificate"],
+    "translations": {
+      "hi": "जाति प्रमाण पत्र",
+      "ta": "சாதிச் சான்றிதழ்",
+      "bn": "জাতি প্রশংসাপত্র"
+    }
+  },
+  "Domicile Certificate": {
+    "aliases": ["Niwas Praman Patra", "निवास प्रमाण पत्र", "Residence Proof"],
+    "translations": {
+      "hi": "निवास प्रमाण पत्र",
+      "ta": "இருப்பிடச் சான்றிதழ்"
+    }
+  },
+  "Ration Card": {
+    "aliases": ["Rashan Card", "राशन कार्ड"],
+    "translations": {
+      "hi": "राशन कार्ड",
+      "ta": "குடும்ப அட்டை (ரேஷன் கார்டு)",
+      "bn": "রেশন কার্ড"
+    }
+  },
+  "Kisan Credit Card": {
+    "aliases": ["KCC", "किसान क्रेडिट कार्ड"],
+    "translations": {
+      "hi": "किसान क्रेडिट कार्ड (KCC)",
+      "ta": "கிசான் கடன் அட்டை"
+    }
+  }
+}

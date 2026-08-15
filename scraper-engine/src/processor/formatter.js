@@ -35,13 +35,16 @@ function format(record = {}) {
 
   return {
     id,
-    url: record.url || null,
-    title: record.title || null,
-    summary: record.summary || null,
-    content: record.content || record.pdfText || null,
-    source: record.source || null,
-    attachments,
-    meta: record.pdfMeta || null,
+    name: record.title || 'Untitled Scheme',
+    description: record.summary || record.content || record.pdfText || 'No description available',
+    department: record.meta?.department || null,
+    category: record.meta?.category || null,
+    state: record.meta?.state || null,
+    eligibility: record.meta?.eligibility || null,
+    benefits: record.meta?.benefits || null,
+    documentsRequired: record.meta?.documentsRequired || null,
+    applicationLink: record.meta?.applicationLink || null,
+    sourceUrl: record.url || null,
     createdAt: now,
     updatedAt: now
   };

@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  language-engine-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "4001:4001"
+    environment:
+      - PORT=4001
+      - PYTHON_ML_SERVICE_URL=http://language-engine-ml:8001
+      - INTERNAL_SERVICE_TOKEN=sathix_internal_secret_2024
+    depends_on:
+      - language-engine-ml
+    restart: unless-stopped
+
+  language-engine-ml:
+    build:
+      context: ./python
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8001"
+    environment:
+      - PYTHON_ML_SERVICE_PORT=8001
+    restart: unless-stopped

@@ -26,11 +26,24 @@ module.exports = {
       options: { topK: input.topK, filters: input.filters }
     });
 
+    // Build structured sources from Qdrant payloads
+    const sources = retrieval.results
+      .map((item) => ({
+        schemeId: item.payload?.schemeId || item.payload?.documentId || item.id,
+        title: item.payload?.title || null,
+        sourceUrl: item.payload?.source || null,
+        state: item.payload?.state || null,
+        category: item.payload?.category || null,
+        score: item.finalScore || item.score || null
+      }))
+      .filter((s) => s.schemeId);
+
     return {
-      query: input.query,
-      prompt,
-      retrieval,
-      answer
+      answer: answer.answer,
+      sources,
+      citations: answer.citations || [],
+      language: retrieval.language,
+      query: input.query
     };
   }
 };

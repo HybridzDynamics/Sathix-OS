@@ -1,0 +1,42 @@
+{
+  "Direct Benefit Transfer": {
+    "aliases": ["DBT", "डीबीटी", "Direct Transfer", "Bank Transfer"],
+    "translations": {
+      "hi": "प्रत्यक्ष लाभ अंतरण (DBT)",
+      "ta": "நேரடி பயன் பரிமாற்றம் (DBT)",
+      "bn": "সরাসরি সুবিধা হস্তান্তর (DBT)"
+    }
+  },
+  "Subsidy": {
+    "aliases": ["Anudan", "अनुदान", "Financial Grant"],
+    "translations": {
+      "hi": "सब्सिडी (अनुदान)",
+      "ta": "மானியம்",
+      "bn": "ভর্তুকি"
+    }
+  },
+  "Installment": {
+    "aliases": ["Kisht", "किस्त", "Hafta"],
+    "translations": {
+      "hi": "किस्त",
+      "ta": "தவணை",
+      "bn": "কিস্তি"
+    }
+  },
+  "Beneficiary": {
+    "aliases": ["Labharthi", "लाभार्थी"],
+    "translations": {
+      "hi": "लाभार्थी",
+      "ta": "பயனாளி",
+      "bn": "উপভোক্তা"
+    }
+  },
+  "Eligibility": {
+    "aliases": ["Patrata", "पात्रता", "Criteria"],
+    "translations": {
+      "hi": "पात्रता (योग्यता)",
+      "ta": "தகுதி",
+      "bn": "যোগ্যতা"
+    }
+  }
+}
