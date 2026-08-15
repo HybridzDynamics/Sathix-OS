@@ -4,7 +4,7 @@ Standalone speech-processing boundary for SathiX OS. It owns audio ingestion, VA
 
 ## Current phase
 
-Phase 4 adds a registry-driven STT endpoint. Set `STT_PROVIDER=python-http` and point `STT_INFERENCE_URL` at an internal local inference process. `/api/v1/speech-to-text` now sends validated audio to that adapter and returns a normalized transcript contract. TTS and voice-query endpoints intentionally remain unavailable.
+Phase 5 connects STT to Language Engine. An STT language prediction is preserved; if it is absent, Voice Service calls Language Engine `POST /api/v1/detect`. `GET /api/v1/languages` now obtains canonical language metadata from Language Engine and overlays voice capabilities. TTS and voice-query endpoints intentionally remain unavailable.
 
 Authentication middleware is scaffolded but will be attached with the public/client authentication policy during the security implementation phase; internal calls already carry the configured service token.
 
