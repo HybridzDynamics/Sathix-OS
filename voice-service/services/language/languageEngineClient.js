@@ -14,6 +14,10 @@ class LanguageEngineClient {
     const response = await this.client.get(`${config.languageEngineUrl}/api/v1/languages`, { headers: this.headers(requestId), timeout: config.requestTimeoutMs });
     return response.data;
   }
+  async getLanguage(code, requestId) {
+    const response = await this.client.get(`${config.languageEngineUrl}/api/v1/languages/${encodeURIComponent(code)}`, { headers: this.headers(requestId), timeout: config.requestTimeoutMs });
+    return response.data;
+  }
   async translate(payload, requestId) {
     const response = await this.client.post(`${config.languageEngineUrl}/api/v1/translate`, payload, { headers: this.headers(requestId), timeout: config.requestTimeoutMs });
     return response.data;
