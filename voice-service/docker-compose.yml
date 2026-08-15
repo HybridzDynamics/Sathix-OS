@@ -1,0 +1,7 @@
+services:
+  voice-service:
+    build: .
+    env_file: .env
+    ports:
+      - "4002:4002"
+    restart: unless-stopped

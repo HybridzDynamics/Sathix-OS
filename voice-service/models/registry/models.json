@@ -1,0 +1,20 @@
+{
+  "activeSttModel": "faster-whisper-small-multilingual",
+  "activeTtsModel": "",
+  "models": [
+    {
+      "id": "faster-whisper-small-multilingual",
+      "name": "faster-whisper Small Multilingual",
+      "version": "openai-whisper-small",
+      "provider": "python-http",
+      "task": "speech-to-text",
+      "modelRef": "Systran/faster-whisper-small",
+      "pathEnv": "STT_MODEL_PATH",
+      "deviceEnv": "STT_DEVICE",
+      "quantizationEnv": "STT_COMPUTE_TYPE",
+      "supportedLanguages": ["en", "hi", "bn", "ta", "te", "mr", "gu", "kn", "ml", "or", "pa", "as", "ur", "ne", "sa", "sd", "ks", "kok", "mai", "sat", "doi", "mni", "brx"],
+      "capabilities": ["stt", "language-identification", "multilingual"],
+      "license": "MIT"
+    }
+  ]
+}
