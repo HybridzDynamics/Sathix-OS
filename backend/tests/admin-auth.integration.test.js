@@ -38,3 +38,9 @@ test('authenticated admin is allowed', async () => {
   assert.equal(response.status, 200);
   assert.deepEqual(await response.json(), { user: { id: 'admin-1', role: 'ADMIN' } });
 });
+
+test('Super Admin inherits administrator access', async () => {
+  const token = jwt.sign({ id: 'super-admin-1', role: 'SUPER_ADMIN' }, process.env.JWT_SECRET);
+  const response = await fetch(`${baseUrl}/api/admin/session`, { headers: { Authorization: `Bearer ${token}` } });
+  assert.equal(response.status, 200);
+});

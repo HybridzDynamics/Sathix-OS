@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
 const routeNames: Record<string, string> = {
-  '/': 'Dashboard',
+  '/dashboard': 'Dashboard',
   '/users': 'View Users',
   '/schemes': 'View Schemes',
   '/approvals': 'Approve Scraped Schemes',

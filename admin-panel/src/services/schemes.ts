@@ -1,0 +1,6 @@
+import { api } from '@/services/api';
+export type AdminScheme = { id: string; name: string; description: string; department: string | null; category: string | null; state: string | null; sourceUrl: string | null; status: 'ACTIVE' | 'DISABLED' | 'ARCHIVED'; origin: 'SCRAPED' | 'ADMIN_MODIFIED'; contentHash: string | null; lastScrapedAt: string | null; indexedAt: string | null; updatedAt: string };
+export type SchemePage = { items: AdminScheme[]; page: number; totalPages: number; total: number };
+export function listSchemes(params: Record<string, string | number | undefined>) { const query = new URLSearchParams(); Object.entries({ limit: 25, ...params }).forEach(([key, value]) => { if (value !== undefined && value !== '') query.set(key, String(value)); }); return api<SchemePage>(`/api/admin/schemes?${query}`); }
+export const updateSchemeStatus = (id: string, status: AdminScheme['status']) => api<{ scheme: AdminScheme }>(`/api/admin/schemes/${id}/status`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status }) });
+export const reindexScheme = (id: string) => api<{ scheme: AdminScheme }>(`/api/admin/schemes/${id}/reindex`, { method: 'POST' });

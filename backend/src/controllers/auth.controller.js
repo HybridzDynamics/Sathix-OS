@@ -50,6 +50,11 @@ const login = async (req, res, next) => {
     if (!passwordMatch) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
+    if (!user.isActive) {
+      return res.status(403).json({ message: 'This account has been deactivated' });
+    }
+
+    await prisma.user.update({ where: { id: user.id }, data: { lastActiveAt: new Date() } });
 
     const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '7d' });
     res.json({ token, user: { id: user.id, name: user.name, mobile: user.mobile, role: user.role, language: user.language } });

@@ -9,6 +9,8 @@ const assistantRoutes = require('./routes/assistant.routes');
 const applicationRoutes = require('./routes/application.routes');
 const scraperRoutes = require('./routes/scraper.routes');
 const adminRoutes = require('./routes/admin.routes');
+const healthRoutes = require('./routes/health.routes');
+const { getHealth } = require('./controllers/health.controller');
 
 const app = express();
 
@@ -23,6 +25,7 @@ app.use('/api/assistant', assistantRoutes);
 app.use('/api/applications', applicationRoutes);
 app.use('/api/scraper', scraperRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api', healthRoutes);
 
 // Stateless RAG query proxy — for clients that call without a user session
 app.post('/api/v1/ai/query', async (req, res, next) => {
@@ -52,36 +55,7 @@ app.post('/api/v1/ai/query', async (req, res, next) => {
 });
 
 // Health check
-app.get('/health', async (req, res) => {
-  const health = {
-    status: 'ok',
-    services: { database: 'unknown', rag: 'unknown' }
-  };
-
-  // Check DB
-  try {
-    const prisma = req.app.locals.prisma;
-    if (prisma) {
-      await prisma.$queryRaw`SELECT 1`;
-      health.services.database = 'ok';
-    }
-  } catch {
-    health.services.database = 'error';
-    health.status = 'degraded';
-  }
-
-  // Check RAG engine
-  try {
-    const RAG_URL = process.env.RAG_ENGINE_URL || 'http://localhost:3001';
-    await axios.get(`${RAG_URL}/rag/health`, { timeout: 3000 });
-    health.services.rag = 'ok';
-  } catch {
-    health.services.rag = 'error';
-    health.status = 'degraded';
-  }
-
-  res.status(health.status === 'ok' ? 200 : 207).json(health);
-});
+app.get('/health', getHealth);
 
 app.use(errorHandler);
 

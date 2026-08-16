@@ -1,7 +1,7 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000';
+const API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://sathix-os.onrender.com';
 const TOKEN_KEY = 'sathix_admin_token';
 
-export type AdminSession = { user: { id: string; role: 'ADMIN' } };
+export type AdminSession = { user: { id: string; role: 'ADMIN' | 'SUPER_ADMIN' } };
 
 export class AuthError extends Error {
   constructor(public status: number, message: string) { super(message); }
@@ -16,7 +16,7 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 
 export async function login(mobile: string, password: string): Promise<AdminSession> {
   const result = await request<{ token: string; user: { role: string } }>('/api/auth/login', { method: 'POST', body: JSON.stringify({ mobile, password }) });
-  if (result.user.role !== 'ADMIN') throw new AuthError(403, 'This account does not have administrator access.');
+  if (!['ADMIN', 'SUPER_ADMIN'].includes(result.user.role)) throw new AuthError(403, 'This account does not have administrator access.');
   const session = await verify(result.token);
   sessionStorage.setItem(TOKEN_KEY, result.token);
   return session;

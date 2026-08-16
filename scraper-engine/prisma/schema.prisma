@@ -10,7 +10,19 @@ datasource db {
 enum Role {
   CITIZEN
   ADMIN
+  SUPER_ADMIN
   PARTNER
+}
+
+enum SchemeStatus {
+  ACTIVE
+  DISABLED
+  ARCHIVED
+}
+
+enum SchemeOrigin {
+  SCRAPED
+  ADMIN_MODIFIED
 }
 
 enum ApplicationStatus {
@@ -73,6 +85,11 @@ model Scheme {
   documentsRequired String?
   applicationLink  String?
   sourceUrl        String?
+  status           SchemeStatus    @default(ACTIVE)
+  origin           SchemeOrigin    @default(SCRAPED)
+  contentHash      String?
+  lastScrapedAt    DateTime?
+  indexedAt        DateTime?
   createdAt        DateTime        @default(now())
   updatedAt        DateTime        @updatedAt
   applications     Application[]
