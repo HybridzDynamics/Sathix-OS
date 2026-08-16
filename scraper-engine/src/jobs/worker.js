@@ -1,6 +1,7 @@
 const { Worker } = require('bullmq');
 const IORedis = require('ioredis');
 const { processUrl } = require('./pipeline');
+const { getPrisma } = require('../db/prismaClient');
 
 const redisUrl = process.env.REDIS_URL || 'redis://127.0.0.1:6379';
 const connection = new IORedis(redisUrl);
@@ -12,15 +13,20 @@ const queueName = 'sathix-crawl';
  */
 
 const concurrency = Number(process.env.WORKER_CONCURRENCY || 2);
+async function updateAdminJob(id, data) { if (!id) return; try { await getPrisma().scraperJob.update({ where: { id }, data }); } catch (error) { console.error('Unable to update scraper job status', error.message); } }
 const worker = new Worker(queueName, async job => {
   const { url, meta } = job.data;
+  const adminJobId = meta?.adminJobId;
+  await updateAdminJob(adminJobId, { status: 'RUNNING', startedAt: new Date(), error: null });
   console.log('Worker: processing', url, 'meta=', meta || {});
   const results = await processUrl(url, { name: meta && meta.source });
+  const failedItems = results.filter((item) => item.status === 'error' || item.status === 'rejected').length;
+  await updateAdminJob(adminJobId, { status: 'COMPLETED', completedAt: new Date(), pagesProcessed: 1, pagesFailed: 0, schemesDiscovered: results.length, failedItems });
   return { url, results };
 }, { connection, concurrency });
 
 worker.on('completed', job => console.log('Job completed', job.id));
-worker.on('failed', (job, err) => console.error('Job failed', job.id, err));
+worker.on('failed', async (job, err) => { await updateAdminJob(job.data?.meta?.adminJobId, { status: 'FAILED', completedAt: new Date(), error: err.message, pagesFailed: 1, failedItems: 1 }); console.error('Job failed', job.id, err); });
 
 process.on('SIGINT', async () => {
   await worker.close();

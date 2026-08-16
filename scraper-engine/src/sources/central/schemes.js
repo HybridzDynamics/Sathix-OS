@@ -6,6 +6,5 @@ module.exports = {
   seeds: [
     'https://www.india.gov.in/topics/social-welfare',
     'https://www.nic.in/schemes',
-    'https://www.example.gov.in/schemes/list'
   ]
 };

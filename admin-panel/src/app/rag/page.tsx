@@ -1,0 +1,13 @@
+'use client';
+import { useEffect, useState } from 'react';
+import { ApiError } from '@/services/api';
+import { getRagStatus, reindexAll, type RagStatus } from '@/services/rag';
+
+export default function RagPage() {
+  const [status, setStatus] = useState<RagStatus | null>(null); const [loading, setLoading] = useState(true); const [reindexing, setReindexing] = useState(false); const [error, setError] = useState(''); const [refresh, setRefresh] = useState(0);
+  useEffect(() => { let active = true; getRagStatus().then((result) => { if (active) setStatus(result); }).catch((cause) => { if (active) setError(cause instanceof ApiError ? cause.message : 'Unable to load RAG status.'); }).finally(() => { if (active) setLoading(false); }); return () => { active = false; }; }, [refresh]);
+  async function reindex() { if (!window.confirm('Re-index all content currently known to RAG? This waits for the actual RAG operation to finish.')) return; setReindexing(true); setError(''); try { await reindexAll(); setRefresh((value) => value + 1); } catch (cause) { setError(cause instanceof Error ? cause.message : 'RAG re-indexing failed.'); } finally { setReindexing(false); } }
+  if (loading) return <p>Loading RAG status…</p>; if (!status) return <p role="alert">{error || 'RAG status is unavailable.'}</p>;
+  const fields = [['Total schemes', String(status.totalSchemes)], ['RAG service', status.service.status], ['Qdrant health', status.service.qdrant], ['Indexed documents', status.indexedDocuments.tracked ? String(status.indexedDocuments.value) : 'Not tracked'], ['Indexed chunks', status.indexedChunks.tracked ? String(status.indexedChunks.value) : 'Not tracked'], ['Embedding model', status.embeddingModel.tracked ? status.embeddingModel.value || 'Unknown' : 'Not tracked']];
+  return <section className="space-y-5"><div><h2 className="text-xl font-bold">RAG knowledge base</h2><p className="text-sm text-slate-600">Operational information is retrieved through Backend; Qdrant is never accessed from this dashboard.</p></div>{error && <p role="alert" className="rounded bg-red-50 p-3 text-red-700">{error}</p>}<div className="grid gap-3 md:grid-cols-3">{fields.map(([label, value]) => <div key={label} className="rounded border bg-white p-4"><div className="text-xs text-slate-500">{label}</div><div className="mt-1 font-semibold">{value}</div></div>)}</div><div className="rounded border bg-white p-4"><p className="text-sm text-slate-600">{status.lastIndexRun.reason}</p><button disabled={reindexing || !status.service.available} onClick={reindex} className="mt-4 rounded bg-emerald-700 px-4 py-2 text-white disabled:opacity-50">{reindexing ? 'Re-indexing…' : 'Re-index all'}</button></div></section>;
+}

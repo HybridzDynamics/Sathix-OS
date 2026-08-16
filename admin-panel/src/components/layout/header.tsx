@@ -12,7 +12,7 @@ const routeNames: Record<string, string> = {
   '/schemes': 'View Schemes',
   '/approvals': 'Approve Scraped Schemes',
   '/scraper': 'Monitor Scraper',
-  '/indexer': 'Trigger Re-indexing',
+  '/rag': 'RAG Knowledge Base',
   '/logs': 'View Logs',
   '/sources': 'Manage Sources',
   '/languages': 'Manage Languages',

@@ -22,7 +22,7 @@ const navigation = [
   { name: 'View Schemes', href: '/schemes', icon: FileText },
   { name: 'Approve Schemes', href: '/approvals', icon: CheckSquare },
   { name: 'Monitor Scraper', href: '/scraper', icon: Activity },
-  { name: 'Trigger Re-indexing', href: '/indexer', icon: RefreshCw },
+  { name: 'RAG Knowledge Base', href: '/rag', icon: RefreshCw },
   { name: 'View Logs', href: '/logs', icon: TerminalSquare },
   { name: 'Manage Sources', href: '/sources', icon: LinkIcon },
   { name: 'Manage Languages', href: '/languages', icon: Languages },

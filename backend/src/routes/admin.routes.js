@@ -14,5 +14,12 @@ router.patch('/users/:id/role', authenticate, authorize(['ADMIN']), adminControl
 router.get('/schemes', authenticate, authorize(['ADMIN']), adminController.listSchemes);
 router.patch('/schemes/:id/status', authenticate, authorize(['ADMIN']), adminController.updateSchemeStatus);
 router.post('/schemes/:id/reindex', authenticate, authorize(['ADMIN']), adminController.reindexScheme);
+router.post('/scraper/jobs', authenticate, authorize(['ADMIN']), adminController.createScraperJob);
+router.get('/scraper/jobs', authenticate, authorize(['ADMIN']), adminController.listScraperJobs);
+router.get('/scraper/status', authenticate, authorize(['ADMIN']), adminController.scraperStatus);
+router.post('/scraper/jobs/:id/retry', authenticate, authorize(['ADMIN']), adminController.retryScraperJob);
+router.post('/scraper/jobs/:id/cancel', authenticate, authorize(['ADMIN']), adminController.cancelScraperJob);
+router.get('/rag/status', authenticate, authorize(['ADMIN']), adminController.ragStatus);
+router.post('/rag/reindex', authenticate, authorize(['ADMIN']), adminController.reindexAll);
 
 module.exports = router;

@@ -1,22 +1,3 @@
-export type JobStatus = 'Running' | 'Success' | 'Failed' | 'Pending';
-
-export interface ScraperJob {
-  id: string;
-  sourceName: string;
-  status: JobStatus;
-  lastRunTime: string;
-  schemesFound: number;
-  schemesAdded: number;
-}
-
-export const mockScraperJobs: ScraperJob[] = [
-  { id: 'JOB-1024', sourceName: 'myScheme Daily Sync', status: 'Success', lastRunTime: '2023-09-15 09:30 AM', schemesFound: 145, schemesAdded: 12 },
-  { id: 'JOB-1025', sourceName: 'Gujarat State Portal', status: 'Running', lastRunTime: '2023-09-15 10:15 AM', schemesFound: 42, schemesAdded: 0 },
-  { id: 'JOB-1026', sourceName: 'UP Schemes Archive', status: 'Failed', lastRunTime: '2023-09-14 11:00 PM', schemesFound: 0, schemesAdded: 0 },
-  { id: 'JOB-1027', sourceName: 'Central Health Ministry', status: 'Pending', lastRunTime: '-', schemesFound: 0, schemesAdded: 0 },
-  { id: 'JOB-1028', sourceName: 'TN e-Sevai Updates', status: 'Success', lastRunTime: '2023-09-15 11:20 AM', schemesFound: 89, schemesAdded: 5 },
-];
-
 export interface ScrapedSchemeApproval {
   id: string;
   name: string;
