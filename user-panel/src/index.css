@@ -1,0 +1,63 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background-color: #F8F9FA;
+    color: #0f172a;
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* Global Font Size Multipliers */
+html[data-text-size="S"] {
+  font-size: 14px;
+}
+html[data-text-size="M"] {
+  font-size: 16px;
+}
+html[data-text-size="L"] {
+  font-size: 18px;
+}
+html[data-text-size="XL"] {
+  font-size: 20px;
+}
+
+/* High Contrast Mode */
+.high-contrast-mode {
+  --tw-border-opacity: 1;
+  filter: contrast(1.15);
+}
+.high-contrast-mode .bg-white {
+  background-color: #FFFFFF !important;
+  border-color: #94A3B8 !important;
+}
+.high-contrast-mode .text-slate-500,
+.high-contrast-mode .text-slate-400 {
+  color: #334155 !important;
+}
+
+/* Reduced Motion Mode */
+.reduced-motion-mode *,
+.reduced-motion-mode *::before,
+.reduced-motion-mode *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* Custom scrollbar hiding for horizontal card scrolls on mobile */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Smooth tap & transition effects */
+button, a {
+  user-select: none;
+}
+

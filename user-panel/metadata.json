@@ -1,0 +1,6 @@
+{
+  "name": "SarthixOS",
+  "description": "AI-powered government-scheme discovery app for Indian citizens, featuring high-accessibility search, voice assistant, and eligibility tracking.",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
