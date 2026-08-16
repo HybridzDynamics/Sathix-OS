@@ -11,12 +11,41 @@ const scraperRoutes = require('./routes/scraper.routes');
 const adminRoutes = require('./routes/admin.routes');
 const healthRoutes = require('./routes/health.routes');
 const { getHealth } = require('./controllers/health.controller');
+const { requestId } = require('./middleware/request-id');
+const { createRateLimiter } = require('./middleware/rate-limit');
 
 const app = express();
 
-app.use(cors());
+const allowedOrigins = (process.env.CORS_ALLOWED_ORIGINS || 'http://localhost:3000')
+  .split(',').map((origin) => origin.trim()).filter(Boolean);
+
+app.disable('x-powered-by');
+app.use(requestId);
+app.use(cors({
+  origin(origin, callback) {
+    // Requests without an Origin header include service probes and same-origin tools.
+    if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
+    const error = new Error('Origin is not allowed by CORS policy.');
+    error.status = 403;
+    return callback(error);
+  },
+  methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Authorization', 'Content-Type', 'X-Request-ID'],
+  exposedHeaders: ['X-Request-ID', 'RateLimit-Limit', 'RateLimit-Remaining', 'RateLimit-Reset'],
+  credentials: false,
+  maxAge: 600
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use('/api', createRateLimiter({
+  windowMs: Number(process.env.API_RATE_LIMIT_WINDOW_MS || 60000),
+  max: Number(process.env.API_RATE_LIMIT_MAX || 300)
+}));
+app.use('/api/auth', createRateLimiter({
+  windowMs: Number(process.env.AUTH_RATE_LIMIT_WINDOW_MS || 60000),
+  max: Number(process.env.AUTH_RATE_LIMIT_MAX || 10),
+  key: (req) => `${req.ip}:${req.body?.mobile || 'unknown'}`
+}));
 
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);

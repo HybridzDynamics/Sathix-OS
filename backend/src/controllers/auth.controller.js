@@ -56,6 +56,11 @@ const login = async (req, res, next) => {
 
     await prisma.user.update({ where: { id: user.id }, data: { lastActiveAt: new Date() } });
 
+    if (['ADMIN', 'SUPER_ADMIN'].includes(user.role) && prisma.auditLog?.create) {
+      // Login auditing must never expose credentials or prevent an otherwise valid login.
+      await prisma.auditLog.create({ data: { action: 'ADMIN_LOGIN', entity: 'User', entityId: user.id, details: JSON.stringify({ actorId: user.id, requestId: req.id }) } }).catch(() => undefined);
+    }
+
     const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '7d' });
     res.json({ token, user: { id: user.id, name: user.name, mobile: user.mobile, role: user.role, language: user.language } });
   } catch (error) {

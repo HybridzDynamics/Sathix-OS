@@ -7,6 +7,9 @@ const PORT = process.env.PORT || 5000;
 
 async function startServer() {
   try {
+    if (!process.env.JWT_SECRET || process.env.JWT_SECRET === 'change_me_in_production') {
+      throw new Error('JWT_SECRET must be set to a strong, unique value before the backend starts.');
+    }
     await prisma.$connect();
     app.locals.prisma = prisma;
     app.listen(PORT, () => {

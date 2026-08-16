@@ -1,10 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const controller = require('../controllers/rag.controller');
+const { serviceAuth } = require('../../middleware/serviceAuth');
 
-router.post('/query', controller.query);
-router.post('/reindex', controller.reindex);
-router.post('/ingest', controller.ingest);
+router.post('/query', serviceAuth, controller.query);
+router.post('/reindex', serviceAuth, controller.reindex);
+router.post('/ingest', serviceAuth, controller.ingest);
 router.get('/health', controller.health);
 
 module.exports = router;
