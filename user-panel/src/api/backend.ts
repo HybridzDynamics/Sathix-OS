@@ -1,4 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || 'https://sathix-os.onrender.com';
 
 export class BackendApiError extends Error {
   constructor(public readonly status: number, message: string) { super(message); }
