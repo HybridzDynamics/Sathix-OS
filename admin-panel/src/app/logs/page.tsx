@@ -9,7 +9,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 
 export default function LogsPage() {
-  const [data, setData] = React.useState<SystemLog[]>(mockLogs);
   const [searchTerm, setSearchTerm] = React.useState('');
   const [selectedLevel, setSelectedLevel] = React.useState('');
   const [selectedSource, setSelectedSource] = React.useState('');
@@ -18,7 +17,7 @@ export default function LogsPage() {
     return Array.from(new Set(mockLogs.map(l => l.source)));
   }, []);
 
-  React.useEffect(() => {
+  const data = React.useMemo(() => {
     let filtered = mockLogs;
 
     if (searchTerm) {
@@ -36,7 +35,7 @@ export default function LogsPage() {
       filtered = filtered.filter(l => l.source === selectedSource);
     }
 
-    setData(filtered);
+    return filtered;
   }, [searchTerm, selectedLevel, selectedSource]);
 
   const columns: ColumnDef<SystemLog>[] = [

@@ -7,9 +7,9 @@ import {
   ChatAttachment,
   ChatSession
 } from '../../types';
-import { allSchemes } from '../../data/schemes';
 import { ChatHeader } from '../chat/ChatHeader';
 import { ChatInlineSchemeCard } from '../chat/ChatInlineSchemeCard';
+import { chat } from '../../api/backend';
 import { 
   Lightbulb, 
   Tractor, 
@@ -133,7 +133,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
   };
 
   // Dispatch a message into conversation and save to active session history
-  const sendMessage = (textToSend?: string) => {
+  const sendMessage = async (textToSend?: string) => {
     const query = (textToSend || inputText).trim();
     if (!query && !attachedFile) return;
 
@@ -157,75 +157,19 @@ export const HomeView: React.FC<HomeViewProps> = ({
     // Save user message immediately to session history
     onUpdateSessionMessages(newMessagesList, userMessageText);
 
-    // Generate Contextual AI Response after simulated thinking delay
-    setTimeout(() => {
-      const lower = userMessageText.toLowerCase();
-      let aiText = '';
-      let recommendedIds: string[] | undefined = undefined;
-      let documentsList: ChatMessage['documentsList'] = undefined;
-      let applicationStatusData: ChatMessage['applicationStatusData'] = undefined;
-
-      if (lower.includes('farmer') || lower.includes('bihar') || lower.includes('kisan') || lower.includes('agriculture') || lower.includes('crop')) {
-        aiText = isHindi
-          ? 'आपके द्वारा साझा की गई जानकारी के आधार पर, यहाँ 3 प्रमुख कृषि योजनाएं हैं जिनके लिए आप पात्र हैं:'
-          : "Based on what you've shared, here are 3 schemes you may be eligible for:";
-        recommendedIds = ['pm-kisan', 'pm-fasal-bima', 'kisan-credit-card'];
-      } else if (lower.includes('document') || lower.includes('documents') || lower.includes('paper') || lower.includes('aadhaar')) {
-        aiText = isHindi
-          ? 'पीएम किसान (PM-Kisan) के लिए आपको आमतौर पर निम्नलिखित दस्तावेजों की आवश्यकता होगी:'
-          : 'For PM Kisan, you will typically need:';
-        documentsList = [
-          { icon: 'id-card', name: isHindi ? 'आधार कार्ड' : 'Aadhaar Card', description: 'Linked with active mobile number for OTP eKYC' },
-          { icon: 'file-text', name: isHindi ? 'भूमि स्वामित्व दस्तावेज (खतौनी)' : 'Land Ownership Documents', description: 'Updated RoR/Khasra/Khatauni in your name' },
-          { icon: 'building', name: isHindi ? 'बैंक पासबुक' : 'Bank Passbook', description: 'Aadhaar DBT linked bank account' },
-        ];
-      } else if (lower.includes('status') || lower.includes('application') || lower.includes('track') || lower.includes('check my application')) {
-        aiText = isHindi
-          ? 'यहाँ आपके चल रहे सरकारी आवेदनों की ताज़ा स्थिति है:'
-          : 'Here is the real-time status of your ongoing government applications:';
-        applicationStatusData = [
-          { schemeTitle: 'PM-Kisan 17th Installment', refNo: 'PMK-2026-UP-88492', status: 'pending', stepText: 'Step 2/3: Land Record & Khatauni Cross-Verification in progress' },
-          { schemeTitle: 'PM Surya Ghar: Rooftop Solar', refNo: 'PMSG-2026-90211', status: 'pending', stepText: 'Step 1/3: DISCOM Feasibility Inspection Scheduled' },
-          { schemeTitle: 'Ayushman Bharat Golden Card', refNo: 'AB-JAY-4491028', status: 'approved', stepText: 'Step 3/3: Active & e-Card Ready for Cashless Treatment' },
-        ];
-      } else if (lower.includes('ayushman') || lower.includes('health') || lower.includes('hospital') || lower.includes('insurance')) {
-        aiText = isHindi
-          ? 'आयुष्मान भारत (PM-JAY) योजना के तहत प्रत्येक पात्र परिवार को प्रति वर्ष ₹5,00,000 तक का मुफ्त व कैशलेस स्वास्थ्य उपचार मिलता है। विवरण नीचे देखें:'
-          : 'Ayushman Bharat (PM-JAY) provides free cashless secondary and tertiary hospitalization up to ₹5,00,000 per family per year. Here are the details:';
-        recommendedIds = ['ayushman-bharat'];
-      } else if (lower.includes('eligible') || lower.includes('what schemes') || lower.includes('qualify') || lower.includes('benefit')) {
-        aiText = isHindi
-          ? `नमस्ते ${user.nameHindi}, आपके ई-केवाईसी प्रोफाइल (लघु किसान, 2.4 एकड़ भूमि, वाराणसी, बीपीएल राशन कार्ड) के आधार पर, आप इन शीर्ष योजनाओं के लिए पात्र हैं:`
-          : `Hello ${user.name.split(' ')[0]}, based on your verified eKYC profile (Small Farmer, 2.4 Acres Land in UP, BPL Ration Card), here are the top matching schemes for you:`;
-        recommendedIds = ['pm-kisan', 'ayushman-bharat', 'pm-fasal-bima'];
-      } else if (userMsg.attachment) {
-        aiText = isHindi
-          ? `दस्तावेज विश्लेषण पूर्ण (${userMsg.attachment.name}): 2.4 एकड़ कृषि भूमि और मान्य ई-केवाईसी रिकॉर्ड सत्यापित हुए। आप प्रत्यक्ष डीबीटी सब्सिडी के लिए पूर्ण रूप से पात्र हैं:`
-          : `Document Analysis Complete for "${userMsg.attachment.name}": 2.4 Acres agricultural land record verified. You qualify for high-priority DBT subsidies:`;
-        recommendedIds = ['pm-kisan', 'pm-fasal-bima'];
-      } else {
-        aiText = isHindi
-          ? `मैंने आपका प्रश्न समझ लिया है: "${query}"। आपकी प्रोफाइल और पात्रता मानदंडों के अनुसार, यहाँ सबसे उपयुक्त सरकारी योजनाएं हैं:`
-          : `Here is what I found for "${query}" based on your citizen profile and current state eligibility criteria:`;
-        recommendedIds = ['pm-kisan', 'ayushman-bharat', 'pm-awas-gramin'];
-      }
-
-      const aiMsg: ChatMessage = {
-        id: `msg-ai-${Date.now()}`,
-        sender: 'assistant',
-        timestamp: getFormattedTime(),
-        text: aiText,
-        recommendedSchemeIds: recommendedIds,
-        documentsList: documentsList,
-        applicationStatusData: applicationStatusData,
-      };
-
+    try {
+      const result = await chat(userMessageText, language);
+      const aiMsg: ChatMessage = { id: `msg-ai-${Date.now()}`, sender: 'assistant', timestamp: getFormattedTime(), text: result.answer || (isHindi ? 'कोई संबंधित जानकारी नहीं मिली।' : 'No relevant information was found.') };
       const finalMessagesList = [...newMessagesList, aiMsg];
       setMessages(finalMessagesList);
-      setIsThinking(false);
       onUpdateSessionMessages(finalMessagesList, userMessageText);
-      speakText(aiText);
-    }, 600);
+      speakText(aiMsg.text);
+    } catch {
+      const aiMsg: ChatMessage = { id: `msg-ai-${Date.now()}`, sender: 'assistant', timestamp: getFormattedTime(), text: isHindi ? 'अभी ज्ञान सेवा उपलब्ध नहीं है। कृपया फिर से प्रयास करें।' : 'The knowledge service is temporarily unavailable. Please try again.' };
+      const finalMessagesList = [...newMessagesList, aiMsg];
+      setMessages(finalMessagesList);
+      onUpdateSessionMessages(finalMessagesList, userMessageText);
+    } finally { setIsThinking(false); }
   };
 
   // Handle suggestion chip click
@@ -453,7 +397,8 @@ export const HomeView: React.FC<HomeViewProps> = ({
                   {msg.recommendedSchemeIds && msg.recommendedSchemeIds.length > 0 && (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
                       {msg.recommendedSchemeIds.map((schemeId) => {
-                        const schemeObj = allSchemes.find((s) => s.id === schemeId);
+                        // Chat responses currently do not include a scheme payload; avoid rendering stale local demo cards.
+                        const schemeObj: Scheme | undefined = undefined;
                         if (!schemeObj) return null;
                         return (
                           <ChatInlineSchemeCard

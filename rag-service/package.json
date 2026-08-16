@@ -7,7 +7,7 @@
     "start": "node src/index.js",
     "dev": "nodemon --watch src --exec node src/index.js",
     "worker": "node src/worker.js",
-    "test": "jest --runInBand",
+    "test": "jest --runInBand --testPathIgnorePatterns=__tests__/integration\\.test\\.js$",
     "test:integration": "node __tests__/integration.test.js"
   },
   "dependencies": {

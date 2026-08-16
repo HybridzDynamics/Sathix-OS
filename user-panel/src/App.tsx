@@ -10,13 +10,6 @@ import {
   AccessibilitySettings,
   TextSize
 } from './types';
-import { 
-  currentUser, 
-  allSchemes, 
-  initialApplications, 
-  savedSchemeIds as initialSavedIds 
-} from './data/schemes';
-import { initialChatSessions } from './data/chatHistory';
 import { Navigation } from './components/Navigation';
 import { HomeView } from './components/views/HomeView';
 import { HistoryView } from './components/views/HistoryView';
@@ -30,11 +23,20 @@ import { SchemeDetailModal } from './components/SchemeDetailModal';
 import { LanguagePickerModal } from './components/LanguagePickerModal';
 import { calculateSchemeMatch } from './utils/schemeMatcher';
 import { Check } from 'lucide-react';
+import { ApiApplication, ApiProfile, ApiScheme, clearToken, getProfile, hasToken, listApplications, listSchemes, submitApplication, updateProfile } from './api/backend';
+import { LoginScreen } from './components/LoginScreen';
+
+const EMPTY_USER: UserProfile = { name: '', nameHindi: '', phone: '', avatarUrl: '', state: '', district: '', village: '', age: 0, occupation: '', occupationHindi: '', education: '', educationHindi: '', annualIncome: 0, landHoldingAcres: 0, rationCardType: 'APL', isAadhaarLinked: false, isKycVerified: false, bankAccountLinked: false, preferredLanguage: 'en' };
+const toScheme = (item: ApiScheme): Scheme => ({ id: item.id, title: item.name, titleHindi: item.name, subtitle: item.department || 'Government scheme', subtitleHindi: item.department || 'Government scheme', description: item.description, descriptionHindi: item.description, category: 'banking', categoryLabel: item.category || 'General', matchPercentage: 0, matchReason: '', iconType: 'bank', benefitAmount: item.benefits || 'See official portal', benefitAmountHindi: item.benefits || 'See official portal', eligibility: item.eligibility ? [item.eligibility] : [], eligibilityHindi: item.eligibility ? [item.eligibility] : [], documentsRequired: item.documentsRequired ? [item.documentsRequired] : [], documentsRequiredHindi: item.documentsRequired ? [item.documentsRequired] : [], ministry: item.department || 'Government of India', officialPortalUrl: item.applicationLink || item.sourceUrl || '' });
+const toApplication = (item: ApiApplication): Application => ({ id: item.id, schemeId: item.schemeId, schemeTitle: item.scheme.name, schemeTitleHindi: item.scheme.name, referenceNumber: item.id, appliedDate: new Date(item.submittedDate || item.createdAt).toLocaleDateString('en-IN'), status: item.status === 'APPROVED' ? 'approved' : item.status === 'REJECTED' ? 'rejected' : 'pending', currentStep: item.status === 'APPROVED' ? 3 : 1, totalSteps: 3, statusDescription: item.status.replaceAll('_', ' ').toLowerCase(), statusDescriptionHindi: item.status.replaceAll('_', ' ').toLowerCase(), timeline: [{ title: 'Application submitted', date: new Date(item.submittedDate || item.createdAt).toLocaleDateString('en-IN'), completed: true }, { title: 'Under review', date: item.status === 'UNDER_REVIEW' ? 'In progress' : 'Pending', completed: item.status === 'APPROVED', current: item.status === 'UNDER_REVIEW' }, { title: 'Decision', date: item.status === 'APPROVED' ? 'Approved' : 'Pending', completed: item.status === 'APPROVED' }] });
+const toUser = ({ user }: ApiProfile): UserProfile => ({ ...EMPTY_USER, name: user.name, nameHindi: user.name, phone: user.mobile, preferredLanguage: user.language === 'HINDI' ? 'hi' : 'en', age: user.profile?.age || 0, gender: user.profile?.gender || '', state: user.profile?.state || '', district: user.profile?.district || '', occupation: user.profile?.occupation || '', occupationHindi: user.profile?.occupation || '', annualIncome: Number(user.profile?.income || 0), education: user.profile?.education || '', educationHindi: user.profile?.education || '', casteCategory: user.profile?.category || '' });
 
 export default function App() {
   const [currentTab, setCurrentTab] = useState<NavTab>('home');
   const [language, setLanguage] = useState<Language>('en');
-  const [user, setUser] = useState<UserProfile>(currentUser);
+  const [authenticated, setAuthenticated] = useState(hasToken);
+  const [user, setUser] = useState<UserProfile>(EMPTY_USER);
+  const [schemes, setSchemes] = useState<Scheme[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>('');
   
   // Global Accessibility Settings (Persisted in state across navigation)
@@ -67,7 +69,7 @@ export default function App() {
 
   // Recalculate dynamic match percentages for schemes automatically whenever user profile updates
   const dynamicSchemes: Scheme[] = useMemo(() => {
-    return allSchemes.map((s) => {
+    return schemes.map((s) => {
       const match = calculateSchemeMatch(s, user);
       return {
         ...s,
@@ -75,14 +77,14 @@ export default function App() {
         matchReason: match.reason,
       };
     });
-  }, [user]);
+  }, [schemes, user]);
 
-  const [savedIds, setSavedIds] = useState<string[]>(initialSavedIds);
-  const [applications, setApplications] = useState<Application[]>(initialApplications);
+  const [savedIds, setSavedIds] = useState<string[]>([]);
+  const [applications, setApplications] = useState<Application[]>([]);
   
   // Collapsible sidebar state & chat sessions history
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(true);
-  const [chatSessions, setChatSessions] = useState<ChatSession[]>(initialChatSessions);
+  const [chatSessions, setChatSessions] = useState<ChatSession[]>([]);
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
 
   const [voiceModalOpen, setVoiceModalOpen] = useState<boolean>(false);
@@ -91,6 +93,16 @@ export default function App() {
   const [audioNarrationActive, setAudioNarrationActive] = useState<boolean>(false);
   
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!authenticated) return;
+    Promise.all([getProfile(), listSchemes(), listApplications()]).then(([profile, schemeResult, applicationResult]) => {
+      setUser(toUser(profile));
+      setLanguage(profile.user.language === 'HINDI' ? 'hi' : 'en');
+      setSchemes(schemeResult.schemes.map(toScheme));
+      setApplications(applicationResult.applications.map(toApplication));
+    }).catch(() => { clearToken(); setAuthenticated(false); });
+  }, [authenticated]);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -105,6 +117,7 @@ export default function App() {
       ...prev,
       ...updatedFields,
     }));
+    void updateProfile({ age: updatedFields.age, gender: updatedFields.gender, state: updatedFields.state, district: updatedFields.district, occupation: updatedFields.occupation, income: updatedFields.annualIncome === undefined ? undefined : String(updatedFields.annualIncome), education: updatedFields.education, category: updatedFields.casteCategory }).catch(() => showToast('Could not save profile changes. Please try again.'));
   };
 
   // Update accessibility settings
@@ -260,7 +273,7 @@ export default function App() {
   };
 
   const handleViewSchemeDetailsById = (schemeId: string) => {
-    const s = dynamicSchemes.find((item) => item.id === schemeId) || allSchemes.find((item) => item.id === schemeId);
+    const s = dynamicSchemes.find((item) => item.id === schemeId);
     if (s) {
       setSelectedScheme(s);
       setIsDetailModalOpen(true);
@@ -273,29 +286,16 @@ export default function App() {
     setIsDetailModalOpen(true);
   };
 
-  const handleSubmitApplication = (scheme: Scheme) => {
+  const handleSubmitApplication = async (scheme: Scheme) => {
     const existing = applications.find((a) => a.schemeId === scheme.id);
     if (!existing) {
-      const newApp: Application = {
-        id: `app-${Date.now()}`,
-        schemeId: scheme.id,
-        schemeTitle: scheme.title,
-        schemeTitleHindi: scheme.titleHindi,
-        referenceNumber: `SAR-${Math.floor(100000 + Math.random() * 900000)}`,
-        appliedDate: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
-        status: 'pending',
-        currentStep: 1,
-        totalSteps: 3,
-        statusDescription: 'Application received & under initial automated verification',
-        statusDescriptionHindi: 'आवेदन प्राप्त हुआ व प्रारंभिक सत्यापन जारी है',
-        timeline: [
-          { title: 'Application Submitted Online', date: 'Today', completed: true, current: true },
-          { title: 'Nodal Officer Verification', date: 'In Progress', completed: false },
-          { title: 'DBT Benefit Sanction', date: 'Pending', completed: false },
-        ],
-      };
-      setApplications([newApp, ...applications]);
-      showToast(language === 'hi' ? 'आवेदन सफलतापूर्वक जमा किया गया!' : 'Application submitted successfully!');
+      try {
+        const result = await submitApplication(scheme.id);
+        setApplications((previous) => [toApplication(result.application), ...previous]);
+        showToast(language === 'hi' ? 'आवेदन सफलतापूर्वक जमा किया गया!' : 'Application submitted successfully!');
+      } catch {
+        showToast(language === 'hi' ? 'आवेदन जमा नहीं हो सका।' : 'The application could not be submitted.');
+      }
     }
   };
 
@@ -303,6 +303,8 @@ export default function App() {
     setSearchQuery(query);
     setCurrentTab('explore');
   };
+
+  if (!authenticated) return <LoginScreen onAuthenticated={() => setAuthenticated(true)} />;
 
   return (
     <div className={`min-h-screen bg-[#F8F9FA] text-slate-900 flex antialiased selection:bg-[#E3F2FD] selection:text-[#1A237E] overflow-x-hidden ${

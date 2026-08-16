@@ -38,7 +38,7 @@ async function retrieve(query, options = {}) {
     confidence,
     topK,
     results: ranked.map((item) => ({
-      id: item.id,
+      id: item.payload?.schemeId || item.payload?.documentId || item.id,
       score: item.score,
       finalScore: item.finalScore,
       payload: item.payload

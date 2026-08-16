@@ -1,0 +1,11 @@
+const router = require('express').Router();
+const { authenticate } = require('../middleware/auth');
+const controller = require('../controllers/integration.controller');
+router.post('/rag/query', authenticate, controller.ragQuery);
+router.post('/language/detect', authenticate, controller.detect);
+router.post('/language/translate', authenticate, controller.translate);
+router.get('/language/supported', authenticate, controller.supportedLanguages);
+router.get('/voice/languages', authenticate, controller.voiceLanguages);
+router.post('/voice/synthesize', authenticate, controller.synthesize);
+router.post('/voice/transcribe', authenticate, controller.transcribe);
+module.exports = router;

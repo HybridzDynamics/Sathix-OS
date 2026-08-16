@@ -1,20 +1,4 @@
-const axios = require('axios');
-
-const RAG_ENGINE_URL = process.env.RAG_ENGINE_URL || 'http://localhost:3001';
-const INTERNAL_SERVICE_TOKEN = process.env.INTERNAL_SERVICE_TOKEN || '';
-const RAG_TIMEOUT_MS = Number(process.env.RAG_TIMEOUT_MS || 15000);
-
-async function queryRag({ query, language, filters, topK }) {
-  const headers = { 'Content-Type': 'application/json' };
-  if (INTERNAL_SERVICE_TOKEN) headers['x-internal-token'] = INTERNAL_SERVICE_TOKEN;
-
-  const response = await axios.post(
-    `${RAG_ENGINE_URL}/rag/query`,
-    { query, language, filters, topK: topK || 5 },
-    { timeout: RAG_TIMEOUT_MS, headers }
-  );
-  return response.data?.data || response.data;
-}
+const rag = require('../integrations/rag.client');
 
 async function chat(prisma, userId, data) {
   const { message, language, filters } = data;
@@ -24,7 +8,7 @@ async function chat(prisma, userId, data) {
   let sources = [];
 
   try {
-    const ragResult = await queryRag({
+    const ragResult = await rag.query({
       query: message,
       language: normalizedLanguage,
       filters: filters || {},

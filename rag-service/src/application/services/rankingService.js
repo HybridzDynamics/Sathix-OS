@@ -39,9 +39,9 @@ function getLanguageMatchBoost(payload, queryLanguage) {
 
 function rankResults(results, options = {}) {
   const weights = {
-    relevance: Number(process.env.RANK_WEIGHT_RELEVANCE || 0.65),
-    freshness: Number(process.env.RANK_WEIGHT_FRESHNESS || 0.25),
-    priority: Number(process.env.RANK_WEIGHT_PRIORITY || 0.1)
+    relevance: Number(process.env.RANK_WEIGHT_RELEVANCE || 0.6),
+    freshness: Number(process.env.RANK_WEIGHT_FRESHNESS || 0.2),
+    priority: Number(process.env.RANK_WEIGHT_PRIORITY || 0.2)
   };
   const queryLanguage = options.queryLanguage;
   const topK = Number(options.topK || 5);
