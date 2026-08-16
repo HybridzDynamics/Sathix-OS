@@ -4,7 +4,7 @@ import { ApiError } from '@/services/api';
 import { type AdminScheme, listSchemes, reindexScheme, updateSchemeStatus } from '@/services/schemes';
 
 export default function SchemesPage() {
-  const [items, setItems] = useState<AdminScheme[]>([]); const [page, setPage] = useState(1); const [totalPages, setTotalPages] = useState(1); const [search, setSearch] = useState(''); const [status, setStatus] = useState(''); const [error, setError] = useState(''); const [loading, setLoading] = useState(true); const [refresh, setRefresh] = useState(0);
+  const [items, setItems] = useState<AdminScheme[]>([]); const [page, setPage] = useState(1); const [totalPages, setTotalPages] = useState(1); const [search, setSearch] = useState(''); const [status, setStatus] = useState<AdminScheme['status'] | ''>(''); const [error, setError] = useState(''); const [loading, setLoading] = useState(true); const [refresh, setRefresh] = useState(0);
   useEffect(() => { let active = true; listSchemes({ page, search, status }).then((result) => { if (active) { setItems(result.items); setTotalPages(Math.max(1, result.totalPages)); } }).catch((cause) => { if (active) setError(cause instanceof ApiError ? cause.message : 'Unable to load schemes.'); }).finally(() => { if (active) setLoading(false); }); return () => { active = false; }; }, [page, search, status, refresh]);
   const reload = () => { setLoading(true); setRefresh((value) => value + 1); };
   async function setSchemeStatus(scheme: AdminScheme, next: AdminScheme['status']) { if (next === scheme.status || !window.confirm(`Set ${scheme.name} to ${next}?`)) return; try { await updateSchemeStatus(scheme.id, next); reload(); } catch (cause) { setError(cause instanceof Error ? cause.message : 'Action failed.'); } }

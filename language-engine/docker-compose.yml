@@ -11,6 +11,8 @@ services:
       - PORT=4001
       - PYTHON_ML_SERVICE_URL=http://language-engine-ml:8001
       - INTERNAL_SERVICE_TOKEN=sathix_internal_secret_2024
+      - BACKEND_URL=https://sathix-os.onrender.com
+      - RAG_ENGINE_URL=https://sathix-os-rag.onrender.com
     depends_on:
       - language-engine-ml
     restart: unless-stopped
