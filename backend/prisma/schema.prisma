@@ -25,6 +25,14 @@ enum SchemeOrigin {
   ADMIN_MODIFIED
 }
 
+enum ScraperJobStatus {
+  QUEUED
+  RUNNING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
 enum ApplicationStatus {
   DRAFT
   SUBMITTED
@@ -155,6 +163,28 @@ model ScraperLog {
   status    String
   meta      String?
   createdAt DateTime @default(now())
+}
+
+model ScraperJob {
+  id                 String            @id @default(cuid())
+  queueJobId         String?           @unique
+  sourceUrl          String
+  sourceName         String?
+  status             ScraperJobStatus  @default(QUEUED)
+  startedAt          DateTime?
+  completedAt        DateTime?
+  pagesProcessed     Int               @default(0)
+  pagesFailed        Int               @default(0)
+  schemesDiscovered  Int               @default(0)
+  newSchemes         Int?
+  updatedSchemes     Int?
+  failedItems        Int               @default(0)
+  error              String?
+  retryCount         Int               @default(0)
+  triggeredBy        String?
+  requestId          String?
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
 }
 
 model Notification {
