@@ -15,3 +15,9 @@ test('STT service rejects a missing active model', async () => {
   const service = new SpeechToTextService({ modelRegistry: { getStt: () => null }, provider: {} });
   await assert.rejects(() => service.transcribe({}), { code: 'MODEL_UNAVAILABLE' });
 });
+
+test('STT provider errors are propagated without fabricating a transcript', async () => {
+  const failure = new Error('provider failed'); failure.code = 'STT_FAILURE';
+  const service = new SpeechToTextService({ modelRegistry: { getStt: () => ({ id: 'test' }) }, provider: { transcribe: async () => { throw failure; } } });
+  await assert.rejects(() => service.transcribe({}), { code: 'STT_FAILURE' });
+});

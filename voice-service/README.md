@@ -4,7 +4,9 @@ Standalone speech-processing boundary for SathiX OS. It owns audio ingestion, VA
 
 ## Current phase
 
-Phase 5 connects STT to Language Engine. An STT language prediction is preserved; if it is absent, Voice Service calls Language Engine `POST /api/v1/detect`. `GET /api/v1/languages` now obtains canonical language metadata from Language Engine and overlays voice capabilities. TTS and voice-query endpoints intentionally remain unavailable.
+Phase 9 adds `lowBandwidth=true` to `/voice/query`. It applies lower upload caps, validates known WAV bitrate, and defaults to `audioMode=none` so only transcript and grounded text are returned. Set `audioMode=inline` to request Base64 audio when the connection can support it. The response echoes a request-derived `operationId`; audio uploads are deliberately not retained, so resumable upload is not supported yet.
+
+For a client retry, reuse the same `X-Request-Id` header and retry only transport-level failures. Voice queries are read-only, but the service intentionally does not retain raw audio or implement server-side upload resumption.
 
 Authentication middleware is scaffolded but will be attached with the public/client authentication policy during the security implementation phase; internal calls already carry the configured service token.
 
@@ -16,7 +18,7 @@ Authentication middleware is scaffolded but will be attached with the public/cli
 - `GET /api/v1/models`
 - `POST /api/v1/speech-to-text` (reserved)
 - `POST /api/v1/text-to-speech` (reserved)
-- `POST /api/v1/voice/query` (reserved)
+- `POST /api/v1/voice/query` (`multipart/form-data`, `audio` required; optional `responseLanguage`, `filters`, `topK`, `lowBandwidth`, `audioMode`)
 
 ## Integration contract
 
@@ -31,7 +33,11 @@ npm install
 npm start
 ```
 
-Run `npm test` after tests are introduced in Phase 10.
+Run the complete unit and integration-style suite with `npm test`.
+
+## Test coverage
+
+The test suite covers English and Hindi STT flow, noisy/short/long/invalid audio handling, silence, STT/TTS failures, unavailable Language Engine/Backend/RAG boundaries, low-bandwidth policy, repeated requests, and a grounded PM-KISAN voice-query flow. External model and service processes are mocked in these tests; deployment verification still requires those processes to be running.
 
 ## Privacy
 

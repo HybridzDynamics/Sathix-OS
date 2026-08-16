@@ -23,5 +23,13 @@ module.exports = {
     vad: process.env.VAD_PROVIDER || 'unconfigured'
   },
   sttInferenceUrl: process.env.STT_INFERENCE_URL || 'http://127.0.0.1:8002',
+  ttsInferenceUrl: process.env.TTS_INFERENCE_URL || 'http://127.0.0.1:8003',
+  maxTtsTextLength: number('MAX_TTS_TEXT_LENGTH', 5000),
+  maxResponseAudioBytes: number('MAX_RESPONSE_AUDIO_BYTES', 5 * 1024 * 1024),
+  lowBandwidth: {
+    maxAudioBytes: number('LOW_BANDWIDTH_MAX_AUDIO_BYTES', 2 * 1024 * 1024),
+    maxAudioDurationMs: number('LOW_BANDWIDTH_MAX_AUDIO_DURATION_MS', 30000),
+    maxBitrate: number('LOW_BANDWIDTH_MAX_BITRATE', 128000)
+  },
   models: { activeStt: process.env.ACTIVE_STT_MODEL || '', activeTts: process.env.ACTIVE_TTS_MODEL || '' }
 };

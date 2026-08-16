@@ -7,7 +7,8 @@ class VoiceLanguageRegistry {
       const models = this.modelRegistry.all();
       const languages = Object.fromEntries(Object.entries(response.languages || {}).map(([code, language]) => {
         const stt = models.some((model) => model.capabilities?.includes('stt') && model.supportedLanguages?.includes(code));
-        return [code, { ...language, stt, tts: this.capabilities.supports(code, 'tts') }];
+        const tts = Boolean(this.modelRegistry.getTts(null, code));
+        return [code, { ...language, stt, tts }];
       }));
       return { source: 'language-engine-with-voice-overlay', total: Object.keys(languages).length, languages };
     } catch (cause) {

@@ -10,9 +10,9 @@ class SpeechToTextService {
     }
     const result = await this.provider.transcribe(audio, { ...options, model });
     if (!result || typeof result.text !== 'string' || !result.text.trim()) {
-      const error = new Error('Speech recognition returned no transcript.');
-      error.code = 'STT_FAILURE';
-      error.status = 502;
+      const error = new Error('No speech was detected in the supplied audio.');
+      error.code = 'NO_SPEECH_DETECTED';
+      error.status = 422;
       throw error;
     }
     return { text: result.text.trim(), language: result.language || null, confidence: Number.isFinite(result.confidence) ? result.confidence : null, durationMs: Number.isFinite(result.durationMs) ? result.durationMs : options.durationMs || null };

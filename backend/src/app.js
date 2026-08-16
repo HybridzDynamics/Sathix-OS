@@ -8,6 +8,7 @@ const schemeRoutes = require('./routes/scheme.routes');
 const assistantRoutes = require('./routes/assistant.routes');
 const applicationRoutes = require('./routes/application.routes');
 const scraperRoutes = require('./routes/scraper.routes');
+const adminRoutes = require('./routes/admin.routes');
 
 const app = express();
 
@@ -21,6 +22,7 @@ app.use('/api/schemes', schemeRoutes);
 app.use('/api/assistant', assistantRoutes);
 app.use('/api/applications', applicationRoutes);
 app.use('/api/scraper', scraperRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Stateless RAG query proxy — for clients that call without a user session
 app.post('/api/v1/ai/query', async (req, res, next) => {

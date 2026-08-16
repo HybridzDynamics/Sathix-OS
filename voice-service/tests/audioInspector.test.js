@@ -17,6 +17,7 @@ test('inspects a PCM WAV file without altering it', () => {
   assert.equal(result.mimeType, 'audio/wav');
   assert.equal(result.durationMs, 1000);
   assert.equal(result.sampleRate, 16000);
+  assert.equal(result.bitRate, 256000);
 });
 
 test('rejects empty and malformed audio', () => {

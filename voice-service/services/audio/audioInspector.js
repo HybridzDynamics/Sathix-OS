@@ -31,7 +31,7 @@ function inspectWav(buffer) {
     offset = dataStart + size + (size % 2);
   }
   if (!fmt || !fmt.byteRate || !dataSize) throw audioError('MALFORMED_AUDIO', 'WAV audio is missing a valid format or data chunk.');
-  return { durationMs: Math.round((dataSize / fmt.byteRate) * 1000), sampleRate: fmt.sampleRate, channels: fmt.channels, bitsPerSample: fmt.bitsPerSample, codec: fmt.format === 1 ? 'pcm' : `wav-${fmt.format}` };
+  return { durationMs: Math.round((dataSize / fmt.byteRate) * 1000), bitRate: fmt.byteRate * 8, sampleRate: fmt.sampleRate, channels: fmt.channels, bitsPerSample: fmt.bitsPerSample, codec: fmt.format === 1 ? 'pcm' : `wav-${fmt.format}` };
 }
 
 function inspectAudio(buffer, declaredMimeType = '') {
@@ -46,7 +46,7 @@ function inspectAudio(buffer, declaredMimeType = '') {
   if (!config.allowedAudioMimeTypes.includes(detected.mimeType) && !(detected.mimeType === 'audio/wav' && config.allowedAudioMimeTypes.includes('audio/x-wav'))) {
     throw audioError('UNSUPPORTED_AUDIO', 'This audio format is not enabled.', 415);
   }
-  const details = detected.mimeType === 'audio/wav' ? inspectWav(buffer) : { durationMs: null, sampleRate: null, channels: null, codec: null };
+  const details = detected.mimeType === 'audio/wav' ? inspectWav(buffer) : { durationMs: null, bitRate: null, sampleRate: null, channels: null, codec: null };
   if (details.durationMs !== null && details.durationMs > config.maxAudioDurationMs) {
     throw audioError('AUDIO_TOO_LONG', `Audio exceeds the ${config.maxAudioDurationMs}-ms duration limit.`, 413);
   }

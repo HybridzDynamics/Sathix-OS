@@ -1,6 +1,7 @@
 const multer = require('multer');
 const config = require('../config');
 const AudioPipeline = require('../services/audio/audioPipeline');
+const lowBandwidth = require('../utils/lowBandwidth');
 
 const audioUpload = multer({ storage: multer.memoryStorage(), limits: { fileSize: config.maxAudioBytes, files: 1 } });
 const pipeline = new AudioPipeline();
@@ -14,6 +15,7 @@ async function validateAudio(req, res, next) {
       throw error;
     }
     req.audio = await pipeline.prepare(req.file);
+    if (lowBandwidth.enabled(req.body?.lowBandwidth)) lowBandwidth.validate(req.audio);
     next();
   } catch (error) { next(error); }
 }

@@ -1,6 +1,6 @@
 {
   "activeSttModel": "faster-whisper-small-multilingual",
-  "activeTtsModel": "",
+  "activeTtsModel": "piper-en-us-lessac",
   "models": [
     {
       "id": "faster-whisper-small-multilingual",
@@ -15,6 +15,20 @@
       "supportedLanguages": ["en", "hi", "bn", "ta", "te", "mr", "gu", "kn", "ml", "or", "pa", "as", "ur", "ne", "sa", "sd", "ks", "kok", "mai", "sat", "doi", "mni", "brx"],
       "capabilities": ["stt", "language-identification", "multilingual"],
       "license": "MIT"
+    },
+    {
+      "id": "piper-en-us-lessac",
+      "name": "Piper en_US-lessac",
+      "version": "voice-selected-at-deployment",
+      "provider": "python-http",
+      "task": "text-to-speech",
+      "modelRef": "rhasspy/piper-voices",
+      "pathEnv": "TTS_MODEL_PATH",
+      "deviceEnv": "TTS_DEVICE",
+      "quantizationEnv": "TTS_COMPUTE_TYPE",
+      "supportedLanguages": ["en"],
+      "capabilities": ["tts", "local-inference"],
+      "license": "Piper engine is MIT; verify the selected voice artifact license before production use."
     }
   ]
 }

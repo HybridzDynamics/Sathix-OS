@@ -1,7 +1,8 @@
 'use client';
 
-import { usePathname } from 'next/navigation';
-import { Search, Bell } from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
+import { Search, Bell, LogOut } from 'lucide-react';
+import { logout } from '@/services/auth';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
@@ -20,6 +21,7 @@ const routeNames: Record<string, string> = {
 
 export function Header() {
   const pathname = usePathname();
+  const router = useRouter();
   const title = routeNames[pathname] || 'Dashboard';
 
   return (
@@ -39,6 +41,7 @@ export function Header() {
           <Bell className="h-5 w-5 text-muted-foreground" />
           <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-destructive"></span>
         </Button>
+        <Button variant="ghost" size="icon" aria-label="Log out" onClick={() => { logout(); router.replace('/login'); }}><LogOut className="h-5 w-5 text-muted-foreground" /></Button>
       </div>
     </header>
   );
