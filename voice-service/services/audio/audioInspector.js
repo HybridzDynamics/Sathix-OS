@@ -46,6 +46,9 @@ function inspectAudio(buffer, declaredMimeType = '') {
   if (!config.allowedAudioMimeTypes.includes(detected.mimeType) && !(detected.mimeType === 'audio/wav' && config.allowedAudioMimeTypes.includes('audio/x-wav'))) {
     throw audioError('UNSUPPORTED_AUDIO', 'This audio format is not enabled.', 415);
   }
+  if (normalizedDeclaredType && normalizedDeclaredType !== 'application/octet-stream' && normalizedDeclaredType !== detected.mimeType && !(normalizedDeclaredType === 'audio/x-wav' && detected.mimeType === 'audio/wav')) {
+    throw audioError('AUDIO_MIME_MISMATCH', 'Declared MIME type does not match the detected audio format.', 415);
+  }
   const details = detected.mimeType === 'audio/wav' ? inspectWav(buffer) : { durationMs: null, bitRate: null, sampleRate: null, channels: null, codec: null };
   if (details.durationMs !== null && details.durationMs > config.maxAudioDurationMs) {
     throw audioError('AUDIO_TOO_LONG', `Audio exceeds the ${config.maxAudioDurationMs}-ms duration limit.`, 413);

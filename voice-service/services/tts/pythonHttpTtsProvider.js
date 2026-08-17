@@ -13,7 +13,9 @@ class PythonHttpTtsProvider extends TextToSpeechProvider {
       });
       const buffer = Buffer.from(response.data);
       if (!buffer.length) throw new Error('TTS provider returned empty audio.');
-      return { buffer, mimeType: response.headers['content-type'] || 'audio/wav', modelId: model.id };
+      const mimeType = response.headers['content-type'] || '';
+      if (!mimeType.startsWith('audio/')) throw new Error('TTS provider returned a non-audio response.');
+      return { buffer, mimeType, modelId: model.id };
     } catch (cause) {
       const error = new Error(cause.response?.data?.error?.message || cause.message || 'Text-to-speech provider is unavailable.');
       error.code = cause.code === 'ECONNREFUSED' || cause.code === 'ETIMEDOUT' ? 'TTS_UNAVAILABLE' : 'TTS_FAILURE';

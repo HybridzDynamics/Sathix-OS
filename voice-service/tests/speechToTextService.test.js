@@ -1,6 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const SpeechToTextService = require('../services/stt/speechToTextService');
+const PythonHttpSttProvider = require('../services/stt/pythonHttpSttProvider');
 
 test('STT service preserves provider language, confidence and duration', async () => {
   const service = new SpeechToTextService({
@@ -20,4 +21,9 @@ test('STT provider errors are propagated without fabricating a transcript', asyn
   const failure = new Error('provider failed'); failure.code = 'STT_FAILURE';
   const service = new SpeechToTextService({ modelRegistry: { getStt: () => ({ id: 'test' }) }, provider: { transcribe: async () => { throw failure; } } });
   await assert.rejects(() => service.transcribe({}), { code: 'STT_FAILURE' });
+});
+
+test('HTTP STT provider rejects an invalid upstream response', async () => {
+  const provider = new PythonHttpSttProvider({ post: async () => ({ data: {} }) });
+  await assert.rejects(() => provider.transcribe({ buffer: Buffer.from('audio'), mimeType: 'audio/wav', metadata: {} }, { model: { id: 'test' } }), { code: 'STT_FAILURE' });
 });

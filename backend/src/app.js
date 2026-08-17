@@ -10,6 +10,7 @@ const scraperRoutes = require('./routes/scraper.routes');
 const adminRoutes = require('./routes/admin.routes');
 const healthRoutes = require('./routes/health.routes');
 const integrationRoutes = require('./routes/integration.routes');
+const internalRoutes = require('./routes/internal.routes');
 const { getHealth } = require('./controllers/health.controller');
 const { requestId } = require('./middleware/request-id');
 const { createRateLimiter } = require('./middleware/rate-limit');
@@ -54,6 +55,7 @@ app.use('/api/assistant', assistantRoutes);
 app.use('/api/applications', applicationRoutes);
 app.use('/api/scraper', scraperRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/internal', internalRoutes);
 app.use('/api', integrationRoutes);
 app.use('/api', healthRoutes);
 

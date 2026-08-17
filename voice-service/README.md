@@ -13,6 +13,7 @@ Authentication middleware is scaffolded but will be attached with the public/cli
 ## Endpoints
 
 - `GET /health`
+- `GET /ready` (dependency readiness; returns 503 until Backend, Language Engine, STT, and TTS are reachable)
 - `GET /api/v1/health`
 - `GET /api/v1/languages`
 - `GET /api/v1/models`
@@ -22,7 +23,7 @@ Authentication middleware is scaffolded but will be attached with the public/cli
 
 ## Integration contract
 
-The service calls Language Engine at `/api/v1/detect` and `/api/v1/translate`, and Backend at `/api/v1/ai/query`. It must not call RAG Service or Qdrant directly.
+The service calls Language Engine at `/api/v1/detect` and `/api/v1/translate`, and Backend at `/api/internal/voice/query`. It must not call RAG Service or Qdrant directly.
 
 ## Local start
 

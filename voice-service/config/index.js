@@ -9,6 +9,7 @@ module.exports = {
   serviceName: 'sathix-voice-service',
   port: number('PORT', 4002),
   host: process.env.HOST || '0.0.0.0',
+  allowedOrigins: (process.env.CORS_ALLOWED_ORIGINS || '').split(',').map((value) => value.trim()).filter(Boolean),
   internalServiceToken: process.env.INTERNAL_SERVICE_TOKEN || '',
   languageEngineUrl: process.env.LANGUAGE_ENGINE_URL || 'http://localhost:4001',
   backendUrl: process.env.BACKEND_URL || 'http://localhost:5000',

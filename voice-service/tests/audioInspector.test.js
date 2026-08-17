@@ -1,6 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const { inspectAudio } = require('../services/audio/audioInspector');
+const AudioPipeline = require('../services/audio/audioPipeline');
 
 function wav({ sampleRate = 16000, seconds = 1 } = {}) {
   const dataSize = sampleRate * seconds * 2;
@@ -27,4 +28,15 @@ test('rejects empty and malformed audio', () => {
 
 test('rejects a declared non-audio MIME type', () => {
   assert.throws(() => inspectAudio(wav(), 'text/plain'), { code: 'UNSUPPORTED_AUDIO' });
+});
+
+test('rejects a MIME type that disagrees with the detected file signature', () => {
+  assert.throws(() => inspectAudio(wav(), 'audio/mpeg'), { code: 'AUDIO_MIME_MISMATCH' });
+});
+
+test('marks silent PCM WAV audio without retaining or changing the input bytes', async () => {
+  const file = wav();
+  const audio = await new AudioPipeline().prepare({ buffer: file, mimetype: 'audio/wav', originalname: 'silent.wav' });
+  assert.equal(audio.buffer, file);
+  assert.equal(audio.voiceActivity.state, 'silence');
 });

@@ -18,7 +18,10 @@ class PythonHttpSttProvider extends SpeechToTextProvider {
           ...(requestId ? { 'X-Request-Id': requestId } : {})
         }
       });
-      return { ...response.data, durationMs: response.data?.durationMs ?? durationMs ?? audio.metadata?.durationMs };
+      if (!response.data || typeof response.data.text !== 'string') {
+        const error = new Error('Speech recognition provider returned an invalid response.'); error.code = 'STT_FAILURE'; error.status = 502; throw error;
+      }
+      return { ...response.data, durationMs: response.data.durationMs ?? durationMs ?? audio.metadata?.durationMs };
     } catch (cause) {
       const error = new Error(cause.response?.data?.error?.message || 'Speech recognition provider is unavailable.');
       error.code = cause.code === 'ECONNREFUSED' || cause.code === 'ETIMEDOUT' ? 'STT_UNAVAILABLE' : 'STT_FAILURE';

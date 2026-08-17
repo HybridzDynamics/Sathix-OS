@@ -15,6 +15,9 @@ async function validateAudio(req, res, next) {
       throw error;
     }
     req.audio = await pipeline.prepare(req.file);
+    if (req.audio.voiceActivity.state === 'silence') {
+      const error = new Error('No speech was detected in the supplied audio.'); error.code = 'NO_SPEECH_DETECTED'; error.status = 422; throw error;
+    }
     if (lowBandwidth.enabled(req.body?.lowBandwidth)) lowBandwidth.validate(req.audio);
     next();
   } catch (error) { next(error); }
