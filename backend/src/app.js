@@ -16,7 +16,7 @@ const { createRateLimiter } = require('./middleware/rate-limit');
 
 const app = express();
 
-const allowedOrigins = (process.env.CORS_ALLOWED_ORIGINS || 'http://localhost:3000'|| 'https://sathix-os-user.vercel.app/')
+const allowedOrigins = (process.env.CORS_ALLOWED_ORIGINS || 'http://localhost:3000'|| 'https://sathix-os-user.vercel.app/' )
   .split(',').map((origin) => origin.trim()).filter(Boolean);
 
 app.disable('x-powered-by');
