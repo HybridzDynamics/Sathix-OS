@@ -1,6 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const ConversationService = require('../services/conversation/conversationService');
+const BackendClient = require('../services/conversation/backendClient');
 
 test('sends a language-resolved transcript to Backend and preserves sources', async () => {
   let request;
@@ -14,4 +15,9 @@ test('sends a language-resolved transcript to Backend and preserves sources', as
 test('does not fabricate an answer when Backend returns an invalid result', async () => {
   const service = new ConversationService({ backend: { query: async () => ({ sources: [] }) } });
   await assert.rejects(() => service.queryBackend({ transcript: 'schemes', language: 'en' }), { code: 'BACKEND_RESPONSE_INVALID' });
+});
+
+test('maps Backend structured RAG-unavailable errors without exposing upstream details', async () => {
+  const client = new BackendClient({ post: async () => { const error = new Error('request failed'); error.response = { data: { error: { code: 'RAG_SERVICE_UNAVAILABLE', message: 'RAG service is temporarily unavailable.' } } }; throw error; } });
+  await assert.rejects(() => client.query({ query: 'farmer schemes', language: 'en' }), { code: 'RAG_UNAVAILABLE' });
 });

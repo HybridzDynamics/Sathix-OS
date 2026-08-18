@@ -2,6 +2,51 @@ services:
   voice-service:
     build: .
     env_file: .env
+    environment:
+      STT_INFERENCE_URL: http://stt-inference:8002
+      TTS_INFERENCE_URL: http://tts-inference:8003
     ports:
       - "4002:4002"
+    depends_on:
+      stt-inference:
+        condition: service_healthy
+      tts-inference:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"fetch('http://localhost:4002/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))\""]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+
+  stt-inference:
+    build:
+      context: .
+      dockerfile: python/stt/Dockerfile
+    environment:
+      STT_MODEL_PATH: ${STT_MODEL_PATH:?Set STT_MODEL_PATH to the model path inside /models}
+      STT_DEVICE: ${STT_DEVICE:-cpu}
+      STT_COMPUTE_TYPE: ${STT_COMPUTE_TYPE:-int8}
+    volumes:
+      - ${VOICE_MODEL_DIR:-./runtime-models}:/models:ro
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"from urllib.request import urlopen; assert urlopen('http://localhost:8002/health').status == 200\""]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+
+  tts-inference:
+    build:
+      context: .
+      dockerfile: python/tts/Dockerfile
+    environment:
+      TTS_MODEL_PATH: ${TTS_MODEL_PATH:?Set TTS_MODEL_PATH to the model path inside /models}
+    volumes:
+      - ${VOICE_MODEL_DIR:-./runtime-models}:/models:ro
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"from urllib.request import urlopen; assert urlopen('http://localhost:8003/health').status == 200\""]
+      interval: 30s
+      timeout: 5s
+      retries: 3
     restart: unless-stopped

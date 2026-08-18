@@ -8,7 +8,7 @@ Phase 9 adds `lowBandwidth=true` to `/voice/query`. It applies lower upload caps
 
 For a client retry, reuse the same `X-Request-Id` header and retry only transport-level failures. Voice queries are read-only, but the service intentionally does not retain raw audio or implement server-side upload resumption.
 
-Authentication middleware is scaffolded but will be attached with the public/client authentication policy during the security implementation phase; internal calls already carry the configured service token.
+The Voice Service is an internal API protected by `X-Internal-Token`. Public/client authentication belongs at the Backend gateway; browser clients must not call Voice Service directly.
 
 ## Endpoints
 
@@ -35,6 +35,20 @@ npm start
 ```
 
 Run the complete unit and integration-style suite with `npm test`.
+
+## Docker deployment
+
+Compose starts only the Voice API and its private STT/TTS inference processes. Backend and Language Engine remain separate services and must be reachable through `BACKEND_URL` and `LANGUAGE_ENGINE_URL` in `.env`.
+
+Place approved model artifacts outside source control under `VOICE_MODEL_DIR`, then set container-visible paths such as `STT_MODEL_PATH=/models/faster-whisper-small` and `TTS_MODEL_PATH=/models/en_US-lessac-medium.onnx`.
+
+```bash
+cd voice-service
+copy .env.example .env
+docker compose up --build
+```
+
+Only port 4002 is published. Ports 8002 and 8003 are private to the Compose network.
 
 ## Test coverage
 

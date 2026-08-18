@@ -50,7 +50,7 @@ def synthesize(payload: dict, background_tasks: BackgroundTasks, x_model_id: str
         with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as output_file:
             output_path = output_file.name
         with wave.open(output_path, "wb") as wav_file:
-            voice().synthesize(text.strip(), wav_file)
+            voice().synthesize_wav(text.strip(), wav_file)
         background_tasks.add_task(Path(output_path).unlink, missing_ok=True)
         return FileResponse(output_path, media_type="audio/wav", filename="speech.wav", background=background_tasks)
     except HTTPException:

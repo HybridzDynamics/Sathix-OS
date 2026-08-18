@@ -1,0 +1,19 @@
+{
+  "name": "sathix-whatsapp-service",
+  "version": "1.0.0",
+  "private": true,
+  "description": "WhatsApp Cloud API transport service for SathiX OS.",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "test": "node --test tests/*.test.js"
+  },
+  "engines": { "node": ">=18" },
+  "dependencies": {
+    "axios": "^1.19.0",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2"
+  },
+  "devDependencies": { "nodemon": "^3.1.10" }
+}
