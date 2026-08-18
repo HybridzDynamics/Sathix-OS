@@ -18,9 +18,11 @@ const { createRateLimiter } = require('./middleware/rate-limit');
 const app = express();
 
 const allowedOrigins = (process.env.CORS_ALLOWED_ORIGINS || [
-  'http://localhost:3000',
-  'http://localhost:3001',
-  'https://sathix-os-user.vercel.app'
+  'https://sathix-os-admin.vercel.app',
+  'https://sathix-os-1.onrender.com/',
+  'https://sathix-os-user.vercel.app',
+  'https://sathix-os-languageengine.onrender.com'
+
 ].join(','))
   .split(',').map((origin) => origin.trim()).filter(Boolean);
 
