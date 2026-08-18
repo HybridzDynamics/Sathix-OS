@@ -45,7 +45,7 @@ interface HomeViewProps {
   isSidebarOpen: boolean;
   onToggleSidebar: () => void;
   activeSession: ChatSession | null;
-  onUpdateSessionMessages: (messages: ChatMessage[], firstQuery?: string) => void;
+  onUpdateSessionMessages: (messages: ChatMessage[], firstQuery?: string, serverSessionId?: string) => void;
   onNewChat: () => void;
   voiceEnabled?: boolean;
 }
@@ -158,11 +158,11 @@ export const HomeView: React.FC<HomeViewProps> = ({
     onUpdateSessionMessages(newMessagesList, userMessageText);
 
     try {
-      const result = await chat(userMessageText, language);
+      const result = await chat(userMessageText, language, activeSession?.serverSessionId);
       const aiMsg: ChatMessage = { id: `msg-ai-${Date.now()}`, sender: 'assistant', timestamp: getFormattedTime(), text: result.answer || (isHindi ? 'कोई संबंधित जानकारी नहीं मिली।' : 'No relevant information was found.') };
       const finalMessagesList = [...newMessagesList, aiMsg];
       setMessages(finalMessagesList);
-      onUpdateSessionMessages(finalMessagesList, userMessageText);
+      onUpdateSessionMessages(finalMessagesList, userMessageText, result.session.id);
       speakText(aiMsg.text);
     } catch {
       const aiMsg: ChatMessage = { id: `msg-ai-${Date.now()}`, sender: 'assistant', timestamp: getFormattedTime(), text: isHindi ? 'अभी ज्ञान सेवा उपलब्ध नहीं है। कृपया फिर से प्रयास करें।' : 'The knowledge service is temporarily unavailable. Please try again.' };

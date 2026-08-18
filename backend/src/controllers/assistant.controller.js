@@ -3,8 +3,13 @@ const aiService = require('../services/ai.service');
 const chat = async (req, res, next) => {
   try {
     const prisma = req.app.locals.prisma;
-    const { message, language } = req.body;
-    const response = await aiService.chat(prisma, req.user.id, { message, language });
+    const { message, language, sessionId } = req.body;
+    if (typeof message !== 'string' || !message.trim() || message.length > 4000) {
+      const error = new Error('message must be a non-empty string no longer than 4000 characters.');
+      error.status = 422;
+      throw error;
+    }
+    const response = await aiService.chat(prisma, req.user.id, { message: message.trim(), language, sessionId });
     res.json(response);
   } catch (error) {
     next(error);

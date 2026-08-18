@@ -1,8 +1,17 @@
 const rag = require('../integrations/rag.client');
 
 async function chat(prisma, userId, data) {
-  const { message, language, filters } = data;
+  const { message, language, filters, sessionId } = data;
   const normalizedLanguage = language ? language.toLowerCase() : 'en';
+  let existingSession = null;
+  if (sessionId) {
+    existingSession = await prisma.chatSession.findFirst({ where: { id: sessionId, userId } });
+    if (!existingSession) {
+      const error = new Error('Chat session was not found.');
+      error.status = 404;
+      throw error;
+    }
+  }
 
   let answer = 'I could not find relevant scheme information at this time.';
   let sources = [];
@@ -21,18 +30,19 @@ async function chat(prisma, userId, data) {
     console.error('[ai.service] RAG query failed:', err.message);
   }
 
-  const session = await prisma.chatSession.create({
-    data: {
-      userId,
-      messages: {
-        create: [
-          { role: 'user', content: message },
-          { role: 'assistant', content: answer },
-        ],
-      },
-    },
-    include: { messages: true },
-  });
+  let session;
+  if (sessionId) {
+    await prisma.chatMessage.createMany({ data: [
+      { sessionId: existingSession.id, role: 'user', content: message },
+      { sessionId: existingSession.id, role: 'assistant', content: answer },
+    ] });
+    session = await prisma.chatSession.findUnique({ where: { id: existingSession.id }, include: { messages: true } });
+  } else {
+    session = await prisma.chatSession.create({
+      data: { userId, messages: { create: [{ role: 'user', content: message }, { role: 'assistant', content: answer }] } },
+      include: { messages: true },
+    });
+  }
 
   return { answer, sources, session };
 }

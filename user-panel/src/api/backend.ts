@@ -22,6 +22,7 @@ export async function backendApi<T>(path: string, options: RequestInit = {}): Pr
 export type ApiScheme = { id: string; name: string; description: string; department?: string | null; category?: string | null; benefits?: string | null; eligibility?: string | null; documentsRequired?: string | null; applicationLink?: string | null; sourceUrl?: string | null };
 export type ApiApplication = { id: string; schemeId: string; status: string; submittedDate?: string | null; createdAt: string; scheme: ApiScheme };
 export type ApiProfile = { user: { id: string; name: string; mobile: string; language: string; profile?: { age?: number | null; gender?: string | null; state?: string | null; district?: string | null; occupation?: string | null; income?: string | null; education?: string | null; category?: string | null; familyDetails?: string | null } | null } };
+export type ApiChatSession = { id: string; createdAt: string; messages: { id: string; role: string; content: string; createdAt: string }[] };
 
 export const login = (mobile: string, password: string) => backendApi<{ token: string; user: { id: string; name: string; mobile: string; role: string; language: string } }>('/api/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mobile, password }) });
 export const register = (name: string, mobile: string, password: string) => backendApi<{ id: string }>('/api/auth/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, mobile, password }) });
@@ -30,4 +31,10 @@ export const updateProfile = (profile: Record<string, unknown>) => backendApi('/
 export const listSchemes = () => backendApi<{ schemes: ApiScheme[] }>('/api/schemes');
 export const listApplications = () => backendApi<{ applications: ApiApplication[] }>('/api/applications');
 export const submitApplication = (schemeId: string) => backendApi<{ application: ApiApplication }>('/api/applications', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ schemeId }) });
-export const chat = (message: string, language: string) => backendApi<{ answer: string; sources: unknown[]; session: { id: string } }>('/api/assistant/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message, language }) });
+export const chat = (message: string, language: string, sessionId?: string) => backendApi<{ answer: string; sources: unknown[]; session: { id: string } }>('/api/assistant/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message, language, ...(sessionId ? { sessionId } : {}) }) });
+export const listChatHistory = () => backendApi<{ sessions: ApiChatSession[] }>('/api/assistant/history');
+export const transcribe = (audio: Blob) => {
+  const form = new FormData();
+  form.append('audio', audio, 'recording.webm');
+  return backendApi<{ success: true; data: { text: string; language?: string } }>('/api/voice/transcribe', { method: 'POST', body: form });
+};

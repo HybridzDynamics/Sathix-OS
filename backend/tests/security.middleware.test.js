@@ -39,6 +39,12 @@ test('disallowed browser origins are rejected', async () => {
   assert.equal((await result.json()).message, 'Origin is not allowed by CORS policy.');
 });
 
+test('the documented user-panel deployment origin is allowed by default', async () => {
+  const result = await fetch(`${baseUrl}/api/admin/session`, { headers: { Origin: 'https://sathix-os-user.vercel.app' } });
+  assert.equal(result.status, 401);
+  assert.equal(result.headers.get('access-control-allow-origin'), 'https://sathix-os-user.vercel.app');
+});
+
 test('database role lookup overrides a stale admin token', async () => {
   app.locals.prisma = { user: { findUnique: async () => ({ id: 'user-1', role: 'CITIZEN', isActive: true }) } };
   try {

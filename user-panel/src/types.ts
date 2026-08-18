@@ -116,6 +116,7 @@ export interface ChatMessage {
 
 export interface ChatSession {
   id: string;
+  serverSessionId?: string;
   title: string;
   titleHindi?: string;
   updatedAt: string;
@@ -124,4 +125,3 @@ export interface ChatSession {
   pinned?: boolean;
   category?: string;
 }
-

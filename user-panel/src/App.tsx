@@ -23,13 +23,19 @@ import { SchemeDetailModal } from './components/SchemeDetailModal';
 import { LanguagePickerModal } from './components/LanguagePickerModal';
 import { calculateSchemeMatch } from './utils/schemeMatcher';
 import { Check } from 'lucide-react';
-import { ApiApplication, ApiProfile, ApiScheme, clearToken, getProfile, hasToken, listApplications, listSchemes, submitApplication, updateProfile } from './api/backend';
+import { ApiApplication, ApiChatSession, ApiProfile, ApiScheme, clearToken, getProfile, hasToken, listApplications, listChatHistory, listSchemes, submitApplication, updateProfile } from './api/backend';
 import { LoginScreen } from './components/LoginScreen';
 
 const EMPTY_USER: UserProfile = { name: '', nameHindi: '', phone: '', avatarUrl: '', state: '', district: '', village: '', age: 0, occupation: '', occupationHindi: '', education: '', educationHindi: '', annualIncome: 0, landHoldingAcres: 0, rationCardType: 'APL', isAadhaarLinked: false, isKycVerified: false, bankAccountLinked: false, preferredLanguage: 'en' };
 const toScheme = (item: ApiScheme): Scheme => ({ id: item.id, title: item.name, titleHindi: item.name, subtitle: item.department || 'Government scheme', subtitleHindi: item.department || 'Government scheme', description: item.description, descriptionHindi: item.description, category: 'banking', categoryLabel: item.category || 'General', matchPercentage: 0, matchReason: '', iconType: 'bank', benefitAmount: item.benefits || 'See official portal', benefitAmountHindi: item.benefits || 'See official portal', eligibility: item.eligibility ? [item.eligibility] : [], eligibilityHindi: item.eligibility ? [item.eligibility] : [], documentsRequired: item.documentsRequired ? [item.documentsRequired] : [], documentsRequiredHindi: item.documentsRequired ? [item.documentsRequired] : [], ministry: item.department || 'Government of India', officialPortalUrl: item.applicationLink || item.sourceUrl || '' });
 const toApplication = (item: ApiApplication): Application => ({ id: item.id, schemeId: item.schemeId, schemeTitle: item.scheme.name, schemeTitleHindi: item.scheme.name, referenceNumber: item.id, appliedDate: new Date(item.submittedDate || item.createdAt).toLocaleDateString('en-IN'), status: item.status === 'APPROVED' ? 'approved' : item.status === 'REJECTED' ? 'rejected' : 'pending', currentStep: item.status === 'APPROVED' ? 3 : 1, totalSteps: 3, statusDescription: item.status.replaceAll('_', ' ').toLowerCase(), statusDescriptionHindi: item.status.replaceAll('_', ' ').toLowerCase(), timeline: [{ title: 'Application submitted', date: new Date(item.submittedDate || item.createdAt).toLocaleDateString('en-IN'), completed: true }, { title: 'Under review', date: item.status === 'UNDER_REVIEW' ? 'In progress' : 'Pending', completed: item.status === 'APPROVED', current: item.status === 'UNDER_REVIEW' }, { title: 'Decision', date: item.status === 'APPROVED' ? 'Approved' : 'Pending', completed: item.status === 'APPROVED' }] });
 const toUser = ({ user }: ApiProfile): UserProfile => ({ ...EMPTY_USER, name: user.name, nameHindi: user.name, phone: user.mobile, preferredLanguage: user.language === 'HINDI' ? 'hi' : 'en', age: user.profile?.age || 0, gender: user.profile?.gender || '', state: user.profile?.state || '', district: user.profile?.district || '', occupation: user.profile?.occupation || '', occupationHindi: user.profile?.occupation || '', annualIncome: Number(user.profile?.income || 0), education: user.profile?.education || '', educationHindi: user.profile?.education || '', casteCategory: user.profile?.category || '' });
+const toChatSession = (session: ApiChatSession): ChatSession => {
+  const messages = session.messages.map((message) => ({ id: message.id, sender: message.role === 'assistant' ? 'assistant' as const : 'user' as const, timestamp: new Date(message.createdAt).toLocaleString('en-IN'), text: message.content }));
+  const firstQuestion = messages.find((message) => message.sender === 'user')?.text || 'Scheme consultation';
+  const latest = messages[messages.length - 1];
+  return { id: session.id, serverSessionId: session.id, title: firstQuestion.slice(0, 40), titleHindi: firstQuestion.slice(0, 40), updatedAt: new Date(session.createdAt).toLocaleString('en-IN'), preview: latest?.text.slice(0, 80) || '', messages, category: 'General' };
+};
 
 export default function App() {
   const [currentTab, setCurrentTab] = useState<NavTab>('home');
@@ -96,11 +102,12 @@ export default function App() {
 
   useEffect(() => {
     if (!authenticated) return;
-    Promise.all([getProfile(), listSchemes(), listApplications()]).then(([profile, schemeResult, applicationResult]) => {
+    Promise.all([getProfile(), listSchemes(), listApplications(), listChatHistory()]).then(([profile, schemeResult, applicationResult, historyResult]) => {
       setUser(toUser(profile));
       setLanguage(profile.user.language === 'HINDI' ? 'hi' : 'en');
       setSchemes(schemeResult.schemes.map(toScheme));
       setApplications(applicationResult.applications.map(toApplication));
+      setChatSessions(historyResult.sessions.map(toChatSession));
     }).catch(() => { clearToken(); setAuthenticated(false); });
   }, [authenticated]);
 
@@ -212,7 +219,7 @@ export default function App() {
   };
 
   // Update or Create session messages when user chats
-  const handleUpdateSessionMessages = (messages: ChatMessage[], firstQuery?: string) => {
+  const handleUpdateSessionMessages = (messages: ChatMessage[], firstQuery?: string, serverSessionId?: string) => {
     if (messages.length === 0) return;
 
     const latestMessage = messages[messages.length - 1];
@@ -222,12 +229,15 @@ export default function App() {
       setChatSessions((prev) =>
         prev.map((s) => {
           if (s.id === activeSessionId) {
-            return {
+            const updated = {
               ...s,
               messages: messages,
               preview: previewText,
               updatedAt: 'Just now',
+              ...(serverSessionId ? { serverSessionId } : {}),
             };
+            if (serverSessionId && activeSessionId === s.id) setActiveSessionId(serverSessionId);
+            return { ...updated, id: serverSessionId || s.id };
           }
           return s;
         })
@@ -241,6 +251,7 @@ export default function App() {
 
       const newSession: ChatSession = {
         id: `session-${Date.now()}`,
+        serverSessionId,
         title: title,
         titleHindi: title,
         updatedAt: 'Just now',
