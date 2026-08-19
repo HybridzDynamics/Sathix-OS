@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ChatMessage, Scheme, ActiveTab } from '../types';
+import { ChatMessage, ActiveTab } from '../types';
 import { MOCK_CHAT_INITIAL, MOCK_AI_RESPONSES, MOCK_LANGUAGES } from '../data/mockData';
 import { 
   Bot, 
@@ -7,16 +7,11 @@ import {
   Mic, 
   MicOff, 
   Paperclip, 
-  Languages, 
-  Sparkles, 
   User, 
-  FileText, 
-  CheckCircle, 
   ArrowUpRight, 
   Volume2, 
   RefreshCw,
-  Info,
-  ShieldAlert,
+  Sparkles,
   Loader2
 } from 'lucide-react';
 
@@ -127,25 +122,25 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({
   };
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-[#070B14] text-white flex flex-col justify-between">
+    <div className="min-h-[calc(100vh-4rem)] bg-slate-50 text-slate-900 flex flex-col justify-between">
       
       {/* Header bar for Chat Interface */}
-      <div className="bg-[#0B101E] border-b border-cyan-500/20 px-4 py-3 sm:px-6 flex items-center justify-between shadow-lg">
+      <div className="bg-white border-b border-slate-200 px-4 py-3 sm:px-6 flex items-center justify-between shadow-sm">
         <div className="flex items-center space-x-3">
           <div className="relative">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 flex items-center justify-center text-slate-950 font-bold shadow-md shadow-cyan-500/20">
-              <Bot className="w-6 h-6 text-white" />
+            <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center text-blue-600 font-bold border border-blue-200">
+              <Bot className="w-6 h-6" />
             </div>
-            <span className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 rounded-full border-2 border-[#0B101E]"></span>
+            <span className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 rounded-full border-2 border-white"></span>
           </div>
           <div>
             <div className="flex items-center space-x-2">
-              <h2 className="text-sm sm:text-base font-bold text-white">SathiX AI Voice & Text Copilot</h2>
-              <span className="text-[10px] px-2 py-0.5 rounded font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+              <h2 className="text-sm sm:text-base font-bold text-slate-900">SathiX AI Voice & Text Copilot</h2>
+              <span className="text-[10px] px-2 py-0.5 rounded font-bold bg-blue-100 text-blue-700 border border-blue-200">
                 ACTIVE
               </span>
             </div>
-            <p className="text-[11px] text-slate-400">
+            <p className="text-[11px] text-slate-500">
               Conversational Assistance in {MOCK_LANGUAGES.find(l => l.code === activeLanguage)?.nativeName}
             </p>
           </div>
@@ -155,11 +150,11 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({
           {/* Quick Clear Chat */}
           <button 
             onClick={() => setMessages(MOCK_CHAT_INITIAL)}
-            className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:border-slate-700 text-xs flex items-center space-x-1"
+            className="p-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-500 hover:text-slate-900 hover:bg-slate-100 text-xs flex items-center space-x-1"
             title="Reset Conversation"
           >
             <RefreshCw className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Reset</span>
+            <span className="hidden sm:inline font-medium">Reset</span>
           </button>
         </div>
       </div>
@@ -176,10 +171,10 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({
           >
             {/* Avatar */}
             <div
-              className={`w-9 h-9 rounded-xl flex items-center justify-center text-xs font-bold flex-shrink-0 shadow-md ${
+              className={`w-9 h-9 rounded-xl flex items-center justify-center text-xs font-bold flex-shrink-0 shadow-sm ${
                 msg.sender === 'user'
-                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white'
-                  : 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-slate-200 text-slate-700'
               }`}
             >
               {msg.sender === 'user' ? <User className="w-5 h-5" /> : <Bot className="w-5 h-5" />}
@@ -189,42 +184,42 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({
             <div
               className={`max-w-[85%] sm:max-w-[75%] rounded-2xl p-4 sm:p-5 text-sm leading-relaxed space-y-3 ${
                 msg.sender === 'user'
-                  ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-tr-none shadow-lg'
-                  : 'bg-[#0E1527] border border-cyan-500/20 text-slate-200 rounded-tl-none shadow-xl backdrop-blur-md'
+                  ? 'bg-blue-600 text-white rounded-tr-none shadow-sm'
+                  : 'bg-white border border-slate-200 text-slate-800 rounded-tl-none shadow-sm'
               }`}
             >
               {/* Message Header */}
-              <div className="flex items-center justify-between text-[11px] opacity-70 border-b border-white/10 pb-1.5">
-                <span className="font-semibold">{msg.sender === 'user' ? 'Ramesh Verma' : 'SathiX AI Companion'}</span>
+              <div className="flex items-center justify-between text-[11px] opacity-70 border-b border-current/10 pb-1.5 font-medium">
+                <span>{msg.sender === 'user' ? 'Ramesh Verma' : 'SathiX AI Companion'}</span>
                 <span>{msg.timestamp}</span>
               </div>
 
               {/* Message Content Text */}
-              <div className="whitespace-pre-line text-sm sm:text-base">
+              <div className="whitespace-pre-line text-sm sm:text-base font-medium">
                 {msg.text}
               </div>
 
               {/* Embedded Schemes Cards (if AI suggested any) */}
               {msg.suggestedSchemes && msg.suggestedSchemes.length > 0 && (
-                <div className="mt-4 pt-3 border-t border-slate-800 space-y-3">
-                  <span className="text-xs font-bold text-cyan-400 uppercase tracking-wider block">
+                <div className="mt-4 pt-3 border-t border-slate-100 space-y-3">
+                  <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block">
                     Recommended Matching Schemes:
                   </span>
                   <div className="grid grid-cols-1 gap-2.5">
                     {msg.suggestedSchemes.map((sch) => (
                       <div
                         key={sch.id}
-                        className="bg-[#080D1A] p-3.5 rounded-xl border border-cyan-500/30 hover:border-cyan-400 transition flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3"
+                        className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 hover:border-blue-300 transition flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3"
                       >
                         <div>
-                          <div className="text-xs font-bold text-white">{sch.title}</div>
-                          <div className="text-[11px] text-cyan-400 font-mono font-medium mt-0.5">
+                          <div className="text-xs font-bold text-slate-900">{sch.title}</div>
+                          <div className="text-[11px] text-blue-700 font-mono font-medium mt-0.5">
                             Benefit: {sch.benefitAmount}
                           </div>
                         </div>
                         <button
                           onClick={() => setActiveTab('schemes')}
-                          className="px-3 py-1.5 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 text-xs font-bold border border-cyan-500/40 flex items-center space-x-1 whitespace-nowrap self-end sm:self-auto"
+                          className="px-3 py-1.5 rounded-lg bg-blue-100 hover:bg-blue-200 text-blue-700 text-xs font-bold border border-blue-200 flex items-center space-x-1 whitespace-nowrap self-end sm:self-auto"
                         >
                           <span>View Details</span>
                           <ArrowUpRight className="w-3.5 h-3.5" />
@@ -242,9 +237,9 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({
                     <button
                       key={idx}
                       onClick={() => handleSend(promptText)}
-                      className="px-3 py-1.5 rounded-lg bg-slate-900/90 border border-cyan-500/30 hover:border-cyan-400 text-xs text-cyan-300 hover:text-white transition flex items-center space-x-1"
+                      className="px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200 hover:border-blue-300 hover:bg-blue-50 text-xs text-slate-700 font-medium transition flex items-center space-x-1"
                     >
-                      <Sparkles className="w-3 h-3 text-cyan-400" />
+                      <Sparkles className="w-3 h-3 text-blue-500" />
                       <span>{promptText}</span>
                     </button>
                   ))}
@@ -258,15 +253,15 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({
         {/* AI Typing Animation Shimmer */}
         {isTyping && (
           <div className="flex items-center space-x-3">
-            <div className="w-9 h-9 rounded-xl bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 flex items-center justify-center text-xs">
+            <div className="w-9 h-9 rounded-xl bg-slate-200 text-slate-500 flex items-center justify-center text-xs">
               <Bot className="w-5 h-5 animate-spin" />
             </div>
-            <div className="bg-[#0E1527] border border-cyan-500/20 rounded-2xl rounded-tl-none p-4 flex items-center space-x-2">
-              <span className="text-xs text-cyan-400 font-medium">SathiX is computing eligibility...</span>
+            <div className="bg-white border border-slate-200 rounded-2xl rounded-tl-none p-4 flex items-center space-x-2">
+              <span className="text-xs text-slate-500 font-medium">SathiX is computing eligibility...</span>
               <div className="flex space-x-1">
-                <div className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce"></div>
-                <div className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce [animation-delay:0.2s]"></div>
-                <div className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce [animation-delay:0.4s]"></div>
+                <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce"></div>
+                <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce [animation-delay:0.2s]"></div>
+                <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce [animation-delay:0.4s]"></div>
               </div>
             </div>
           </div>
@@ -274,23 +269,23 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({
 
         {/* Document Scanner Loading Overlay State */}
         {isScanningDoc && (
-          <div className="p-4 rounded-2xl bg-cyan-950/40 border border-cyan-500/40 text-center space-y-2 animate-pulse">
-            <Loader2 className="w-6 h-6 text-cyan-400 animate-spin mx-auto" />
-            <p className="text-xs text-cyan-300 font-semibold">Scanning uploaded document with AI OCR & Land Records DB...</p>
+          <div className="p-4 rounded-2xl bg-blue-50 border border-blue-200 text-center space-y-2 animate-pulse">
+            <Loader2 className="w-6 h-6 text-blue-600 animate-spin mx-auto" />
+            <p className="text-xs text-blue-700 font-semibold">Scanning uploaded document with AI OCR & Land Records DB...</p>
           </div>
         )}
 
         {/* Voice Listening Active Waveform Simulation */}
         {isListening && (
-          <div className="p-4 rounded-2xl bg-purple-950/40 border border-purple-500/40 text-center space-y-3">
+          <div className="p-4 rounded-2xl bg-purple-50 border border-purple-200 text-center space-y-3">
             <div className="flex justify-center items-center space-x-1.5">
               <span className="w-1.5 h-6 bg-purple-400 animate-pulse"></span>
-              <span className="w-1.5 h-10 bg-cyan-400 animate-pulse [animation-delay:0.15s]"></span>
+              <span className="w-1.5 h-10 bg-blue-400 animate-pulse [animation-delay:0.15s]"></span>
               <span className="w-1.5 h-14 bg-pink-400 animate-pulse [animation-delay:0.3s]"></span>
               <span className="w-1.5 h-8 bg-purple-400 animate-pulse [animation-delay:0.45s]"></span>
-              <span className="w-1.5 h-12 bg-cyan-400 animate-pulse [animation-delay:0.6s]"></span>
+              <span className="w-1.5 h-12 bg-blue-400 animate-pulse [animation-delay:0.6s]"></span>
             </div>
-            <p className="text-xs font-bold text-purple-300">Listening to your voice... Speak your query in Hindi or English</p>
+            <p className="text-xs font-bold text-purple-700">Listening to your voice... Speak your query in Hindi or English</p>
           </div>
         )}
 
@@ -298,26 +293,26 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({
       </div>
 
       {/* Suggested Quick Prompt Bar */}
-      <div className="bg-[#0A0E1A] border-t border-slate-800/80 px-4 py-2.5 max-w-4xl mx-auto w-full">
+      <div className="bg-white border-t border-slate-200 px-4 py-2.5 max-w-4xl mx-auto w-full">
         <div className="flex items-center space-x-2 overflow-x-auto no-scrollbar py-1 text-xs">
           <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">
             Suggested Prompts:
           </span>
           <button
             onClick={() => handleSend("Which schemes am I eligible for?")}
-            className="px-3 py-1 rounded-full bg-slate-900 border border-slate-700 hover:border-cyan-500 text-slate-300 hover:text-cyan-300 whitespace-nowrap transition"
+            className="px-3 py-1 rounded-full bg-slate-100 border border-slate-200 hover:border-slate-300 text-slate-700 font-medium whitespace-nowrap transition"
           >
             💡 "Which schemes am I eligible for?"
           </button>
           <button
             onClick={() => handleSend("How can I apply for scholarships?")}
-            className="px-3 py-1 rounded-full bg-slate-900 border border-slate-700 hover:border-cyan-500 text-slate-300 hover:text-cyan-300 whitespace-nowrap transition"
+            className="px-3 py-1 rounded-full bg-slate-100 border border-slate-200 hover:border-slate-300 text-slate-700 font-medium whitespace-nowrap transition"
           >
             🎓 "How can I apply for scholarships?"
           </button>
           <button
             onClick={() => handleSend("What documents are required for housing scheme?")}
-            className="px-3 py-1 rounded-full bg-slate-900 border border-slate-700 hover:border-cyan-500 text-slate-300 hover:text-cyan-300 whitespace-nowrap transition"
+            className="px-3 py-1 rounded-full bg-slate-100 border border-slate-200 hover:border-slate-300 text-slate-700 font-medium whitespace-nowrap transition"
           >
             📑 "What documents are required?"
           </button>
@@ -325,7 +320,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({
       </div>
 
       {/* Input controls box */}
-      <div className="bg-[#0B101F] border-t border-cyan-500/20 p-4 max-w-4xl mx-auto w-full">
+      <div className="bg-slate-50 border-t border-slate-200 p-4 max-w-4xl mx-auto w-full">
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -338,7 +333,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({
             type="button"
             onClick={handleDocumentUploadMock}
             title="Upload Document for AI Scan"
-            className="p-3 rounded-xl bg-slate-900 border border-slate-700/80 hover:border-cyan-500/60 text-slate-300 hover:text-cyan-400 transition shadow"
+            className="p-3 rounded-xl bg-white border border-slate-200 hover:border-slate-300 text-slate-500 hover:text-slate-700 transition shadow-sm"
           >
             <Paperclip className="w-5 h-5" />
           </button>
@@ -348,10 +343,10 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({
             type="button"
             onClick={toggleVoiceRecording}
             title="Voice Assistant Mic"
-            className={`p-3 rounded-xl border transition shadow ${
+            className={`p-3 rounded-xl border transition shadow-sm ${
               isListening
-                ? 'bg-purple-600 text-white border-purple-400 animate-pulse'
-                : 'bg-slate-900 border-slate-700/80 hover:border-cyan-500/60 text-slate-300 hover:text-cyan-400'
+                ? 'bg-purple-600 text-white border-purple-600 animate-pulse'
+                : 'bg-white border-slate-200 hover:border-slate-300 text-slate-500 hover:text-slate-700'
             }`}
           >
             {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
@@ -362,23 +357,23 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({
             type="text"
             value={inputQuery}
             onChange={(e) => setInputQuery(e.target.value)}
-            placeholder="Ask about schemes, loans, scholarships, or documents in your language..."
-            className="flex-1 bg-slate-950 border border-slate-700/80 focus:border-cyan-400 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 outline-none transition"
+            placeholder="Ask about schemes, loans, scholarships, or documents..."
+            className="flex-1 bg-white border border-slate-300 focus:border-blue-500 rounded-xl px-4 py-3 text-sm text-slate-900 placeholder-slate-400 outline-none transition shadow-sm"
           />
 
           {/* Submit Button */}
           <button
             type="submit"
             disabled={!inputQuery.trim() || isTyping}
-            className="p-3 rounded-xl bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 disabled:opacity-50 text-slate-950 font-bold transition shadow-lg shadow-cyan-500/20"
+            className="p-3 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold transition shadow-sm"
           >
             <Send className="w-5 h-5" />
           </button>
         </form>
 
         <div className="flex items-center justify-between text-[10px] text-slate-500 mt-2 px-1">
-          <span>AI Response simulated based on standard Ministry rules dataset.</span>
-          <span className="text-cyan-400 font-mono">WCAG Voice & Keyboard Accessible</span>
+          <span>AI Response simulated based on standard rules.</span>
+          <span className="text-slate-400 font-mono">Accessible</span>
         </div>
       </div>
 

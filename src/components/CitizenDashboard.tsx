@@ -11,17 +11,11 @@ import {
   ShieldCheck, 
   FileText, 
   Clock, 
-  CheckCircle2, 
-  AlertCircle, 
   Bell, 
   Bookmark, 
-  ArrowUpRight, 
   Plus, 
   ChevronRight, 
-  Building, 
-  CreditCard,
   Search,
-  ExternalLink
 } from 'lucide-react';
 
 interface CitizenDashboardProps {
@@ -57,42 +51,40 @@ export const CitizenDashboard: React.FC<CitizenDashboardProps> = ({ setActiveTab
   ];
 
   return (
-    <div className="min-h-screen bg-[#070B14] text-white p-4 sm:p-6 lg:p-8">
+    <div className="min-h-screen bg-slate-50 text-slate-900 p-4 sm:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto space-y-8">
         
         {/* Profile Card Header Banner */}
-        <div className="relative rounded-3xl bg-gradient-to-r from-slate-900 via-[#0B132B] to-[#121E3D] border border-cyan-500/30 p-6 sm:p-8 shadow-2xl overflow-hidden">
-          <div className="absolute top-0 right-0 w-80 h-80 bg-cyan-500/10 rounded-full blur-[90px] pointer-events-none"></div>
-
+        <div className="relative rounded-3xl bg-white border border-slate-200 p-6 sm:p-8 shadow-sm overflow-hidden">
           <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
             
             {/* Left: Avatar & Identity */}
             <div className="flex items-center space-x-4">
               <div className="relative">
-                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-cyan-400 to-blue-600 p-0.5 shadow-xl shadow-cyan-500/20">
-                  <div className="w-full h-full bg-[#080D1A] rounded-[14px] flex items-center justify-center">
-                    <User className="w-8 h-8 sm:w-10 sm:h-10 text-cyan-400" />
+                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-blue-100 p-0.5 border border-blue-200">
+                  <div className="w-full h-full bg-white rounded-[14px] flex items-center justify-center">
+                    <User className="w-8 h-8 sm:w-10 sm:h-10 text-blue-600" />
                   </div>
                 </div>
-                <div className="absolute -bottom-1 -right-1 bg-emerald-500 text-slate-950 p-1 rounded-full border-2 border-[#0B132B]" title="Verified Aadhaar Citizen">
+                <div className="absolute -bottom-1 -right-1 bg-emerald-100 text-emerald-700 p-1 rounded-full border-2 border-white" title="Verified Aadhaar Citizen">
                   <ShieldCheck className="w-4 h-4" />
                 </div>
               </div>
 
               <div>
                 <div className="flex items-center space-x-2">
-                  <h1 className="text-xl sm:text-2xl font-black text-white">{MOCK_CITIZEN.name}</h1>
-                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                  <h1 className="text-xl sm:text-2xl font-black text-slate-900">{MOCK_CITIZEN.name}</h1>
+                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-700 border border-emerald-200">
                     VERIFIED CITIZEN
                   </span>
                 </div>
-                <p className="text-xs text-slate-300 mt-1 font-medium">
+                <p className="text-xs text-slate-600 mt-1 font-medium">
                   {MOCK_CITIZEN.occupation} • {MOCK_CITIZEN.district}, {MOCK_CITIZEN.state}
                 </p>
-                <div className="flex flex-wrap gap-2 mt-2 text-[11px] text-slate-400">
-                  <span className="bg-slate-800/80 px-2 py-0.5 rounded border border-slate-700">Aadhaar: {MOCK_CITIZEN.aadhaarNumber}</span>
-                  <span className="bg-slate-800/80 px-2 py-0.5 rounded border border-slate-700">Category: {MOCK_CITIZEN.category}</span>
-                  <span className="bg-slate-800/80 px-2 py-0.5 rounded border border-slate-700">Income: {MOCK_CITIZEN.annualIncome}</span>
+                <div className="flex flex-wrap gap-2 mt-2 text-[11px] text-slate-700">
+                  <span className="bg-slate-100 px-2 py-0.5 rounded border border-slate-200">Aadhaar: {MOCK_CITIZEN.aadhaarNumber}</span>
+                  <span className="bg-slate-100 px-2 py-0.5 rounded border border-slate-200">Category: {MOCK_CITIZEN.category}</span>
+                  <span className="bg-slate-100 px-2 py-0.5 rounded border border-slate-200">Income: {MOCK_CITIZEN.annualIncome}</span>
                 </div>
               </div>
             </div>
@@ -101,16 +93,16 @@ export const CitizenDashboard: React.FC<CitizenDashboardProps> = ({ setActiveTab
             <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
               <button
                 onClick={() => setActiveTab('assistant')}
-                className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-cyan-400 to-blue-500 text-slate-950 font-bold text-xs shadow-lg shadow-cyan-500/20 hover:from-cyan-300 transition flex items-center space-x-2"
+                className="px-4 py-2.5 rounded-xl bg-blue-600 text-white font-bold text-xs shadow-sm hover:bg-blue-700 transition flex items-center space-x-2"
               >
                 <span>Ask AI Assistant</span>
                 <ChevronRight className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setActiveTab('schemes')}
-                className="px-4 py-2.5 rounded-xl bg-slate-900 border border-cyan-500/30 text-white font-bold text-xs hover:border-cyan-400 transition flex items-center space-x-2"
+                className="px-4 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-700 font-bold text-xs hover:bg-slate-50 transition flex items-center space-x-2"
               >
-                <Search className="w-4 h-4 text-cyan-400" />
+                <Search className="w-4 h-4 text-slate-500" />
                 <span>Find New Schemes</span>
               </button>
             </div>
@@ -119,13 +111,13 @@ export const CitizenDashboard: React.FC<CitizenDashboardProps> = ({ setActiveTab
         </div>
 
         {/* Dashboard Navigation Tabs */}
-        <div className="flex space-x-2 border-b border-slate-800 pb-2 overflow-x-auto no-scrollbar">
+        <div className="flex space-x-2 border-b border-slate-200 pb-2 overflow-x-auto no-scrollbar">
           <button
             onClick={() => setActiveSubTab('applications')}
             className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center space-x-2 ${
               activeSubTab === 'applications'
-                ? 'bg-cyan-500 text-slate-950 shadow-md shadow-cyan-500/20'
-                : 'text-slate-400 hover:text-white hover:bg-slate-900'
+                ? 'bg-blue-600 text-white shadow-sm'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
             }`}
           >
             <Clock className="w-4 h-4" />
@@ -136,8 +128,8 @@ export const CitizenDashboard: React.FC<CitizenDashboardProps> = ({ setActiveTab
             onClick={() => setActiveSubTab('documents')}
             className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center space-x-2 ${
               activeSubTab === 'documents'
-                ? 'bg-cyan-500 text-slate-950 shadow-md shadow-cyan-500/20'
-                : 'text-slate-400 hover:text-white hover:bg-slate-900'
+                ? 'bg-blue-600 text-white shadow-sm'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
             }`}
           >
             <FileText className="w-4 h-4" />
@@ -148,8 +140,8 @@ export const CitizenDashboard: React.FC<CitizenDashboardProps> = ({ setActiveTab
             onClick={() => setActiveSubTab('notifications')}
             className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center space-x-2 ${
               activeSubTab === 'notifications'
-                ? 'bg-cyan-500 text-slate-950 shadow-md shadow-cyan-500/20'
-                : 'text-slate-400 hover:text-white hover:bg-slate-900'
+                ? 'bg-blue-600 text-white shadow-sm'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
             }`}
           >
             <Bell className="w-4 h-4" />
@@ -160,8 +152,8 @@ export const CitizenDashboard: React.FC<CitizenDashboardProps> = ({ setActiveTab
             onClick={() => setActiveSubTab('saved')}
             className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center space-x-2 ${
               activeSubTab === 'saved'
-                ? 'bg-cyan-500 text-slate-950 shadow-md shadow-cyan-500/20'
-                : 'text-slate-400 hover:text-white hover:bg-slate-900'
+                ? 'bg-blue-600 text-white shadow-sm'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
             }`}
           >
             <Bookmark className="w-4 h-4" />
@@ -175,7 +167,7 @@ export const CitizenDashboard: React.FC<CitizenDashboardProps> = ({ setActiveTab
             
             {/* Applications List */}
             <div className="lg:col-span-1 space-y-3">
-              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+              <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">
                 Submitted Welfare Applications
               </h3>
               {MOCK_APPLICATIONS.map((app) => (
@@ -184,66 +176,66 @@ export const CitizenDashboard: React.FC<CitizenDashboardProps> = ({ setActiveTab
                   onClick={() => setSelectedApp(app)}
                   className={`p-4 rounded-2xl border transition cursor-pointer ${
                     selectedApp.id === app.id
-                      ? 'bg-[#0E172C] border-cyan-400 shadow-lg shadow-cyan-500/10'
-                      : 'bg-[#090D18] border-slate-800 hover:border-slate-700'
+                      ? 'bg-blue-50 border-blue-300 shadow-sm'
+                      : 'bg-white border-slate-200 hover:border-slate-300'
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-mono text-cyan-400 font-bold">{app.referenceNumber}</span>
+                    <span className="text-[10px] font-mono text-blue-700 font-bold">{app.referenceNumber}</span>
                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${
-                      app.statusText === 'Approved' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-cyan-500/20 text-cyan-300'
+                      app.statusText === 'Approved' ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-blue-100 text-blue-700 border border-blue-200'
                     }`}>
                       {app.statusText}
                     </span>
                   </div>
-                  <h4 className="text-sm font-bold text-white mt-1.5">{app.schemeTitle}</h4>
-                  <p className="text-xs text-slate-400 mt-1 font-mono">{app.benefitAmount}</p>
-                  <div className="text-[10px] text-slate-500 mt-2">Applied on: {app.appliedDate}</div>
+                  <h4 className="text-sm font-bold text-slate-900 mt-1.5">{app.schemeTitle}</h4>
+                  <p className="text-xs text-slate-600 mt-1 font-mono font-medium">{app.benefitAmount}</p>
+                  <div className="text-[10px] text-slate-500 mt-2 font-medium">Applied on: {app.appliedDate}</div>
                 </div>
               ))}
             </div>
 
             {/* Selected Application Timeline View */}
-            <div className="lg:col-span-2 bg-[#090D19] border border-cyan-500/30 rounded-2xl p-6 shadow-xl">
-              <div className="flex items-center justify-between border-b border-slate-800 pb-4 mb-6">
+            <div className="lg:col-span-2 bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-6">
                 <div>
-                  <span className="text-xs text-cyan-400 font-mono">Ref: {selectedApp.referenceNumber}</span>
-                  <h2 className="text-lg font-bold text-white mt-0.5">{selectedApp.schemeTitle}</h2>
+                  <span className="text-xs text-blue-600 font-mono font-medium">Ref: {selectedApp.referenceNumber}</span>
+                  <h2 className="text-lg font-bold text-slate-900 mt-0.5">{selectedApp.schemeTitle}</h2>
                 </div>
                 <div className="text-right">
-                  <div className="text-xs text-slate-400">Total Benefit Value</div>
-                  <div className="text-base font-bold text-emerald-400 font-mono">{selectedApp.benefitAmount}</div>
+                  <div className="text-xs text-slate-600 font-medium">Total Benefit Value</div>
+                  <div className="text-base font-bold text-emerald-600 font-mono">{selectedApp.benefitAmount}</div>
                 </div>
               </div>
 
               {/* Step Timeline */}
-              <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-6">
+              <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-6">
                 Real-Time Verification Timeline
               </h4>
 
-              <div className="relative border-l-2 border-cyan-500/30 ml-4 space-y-8 pb-4">
+              <div className="relative border-l-2 border-slate-200 ml-4 space-y-8 pb-4">
                 {selectedApp.timeline.map((step, idx) => (
                   <div key={idx} className="relative pl-6">
                     
                     {/* Node Dot */}
                     <div className={`absolute -left-[9px] top-0 w-4 h-4 rounded-full border-2 flex items-center justify-center ${
                       step.completed 
-                        ? 'bg-emerald-500 border-emerald-400 text-slate-950'
+                        ? 'bg-emerald-500 border-emerald-200'
                         : step.active
-                        ? 'bg-cyan-400 border-cyan-300 animate-ping'
-                        : 'bg-slate-900 border-slate-700'
+                        ? 'bg-blue-500 border-blue-200 animate-pulse'
+                        : 'bg-white border-slate-300'
                     }`}>
                     </div>
 
                     <div className="flex items-center justify-between">
-                      <h5 className={`text-sm font-bold ${step.completed || step.active ? 'text-white' : 'text-slate-500'}`}>
+                      <h5 className={`text-sm font-bold ${step.completed || step.active ? 'text-slate-900' : 'text-slate-500'}`}>
                         {step.title}
                       </h5>
-                      <span className="text-[10px] text-slate-500 font-mono">{step.date}</span>
+                      <span className="text-[10px] text-slate-500 font-mono font-medium">{step.date}</span>
                     </div>
 
                     {step.description && (
-                      <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+                      <p className="text-xs text-slate-600 mt-1 leading-relaxed font-medium">
                         {step.description}
                       </p>
                     )}
@@ -251,10 +243,10 @@ export const CitizenDashboard: React.FC<CitizenDashboardProps> = ({ setActiveTab
                 ))}
               </div>
 
-              <div className="mt-6 pt-4 border-t border-slate-800 flex justify-end space-x-3">
+              <div className="mt-6 pt-4 border-t border-slate-100 flex justify-end space-x-3">
                 <button 
                   onClick={() => setActiveTab('assistant')}
-                  className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs text-slate-200 font-bold"
+                  className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs text-slate-700 font-bold border border-slate-200"
                 >
                   Ask AI About Status
                 </button>
@@ -269,10 +261,10 @@ export const CitizenDashboard: React.FC<CitizenDashboardProps> = ({ setActiveTab
         {activeSubTab === 'documents' && (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold text-white">Your DigiLocker & SathiX Verified Documents</h3>
+              <h3 className="text-sm font-bold text-slate-900">Your DigiLocker & SathiX Verified Documents</h3>
               <button 
                 onClick={() => setActiveTab('assistant')}
-                className="px-3 py-1.5 rounded-xl bg-cyan-500/20 text-cyan-300 hover:bg-cyan-500/30 text-xs font-bold border border-cyan-500/30 flex items-center gap-1"
+                className="px-3 py-1.5 rounded-xl bg-blue-50 text-blue-700 hover:bg-blue-100 text-xs font-bold border border-blue-200 flex items-center gap-1"
               >
                 <Plus className="w-4 h-4" />
                 <span>Upload New Document</span>
@@ -281,20 +273,20 @@ export const CitizenDashboard: React.FC<CitizenDashboardProps> = ({ setActiveTab
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {MOCK_DOCUMENTS.map((doc) => (
-                <div key={doc.id} className="bg-[#090D18] border border-slate-800 hover:border-cyan-500/40 p-4 rounded-2xl transition">
+                <div key={doc.id} className="bg-white border border-slate-200 hover:border-blue-300 p-4 rounded-2xl transition shadow-sm">
                   <div className="flex items-start justify-between">
-                    <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-100 text-blue-600 flex items-center justify-center">
                       <FileText className="w-5 h-5" />
                     </div>
-                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-700 border border-emerald-200">
                       {doc.status}
                     </span>
                   </div>
 
-                  <h4 className="text-sm font-bold text-white mt-3">{doc.name}</h4>
-                  <p className="text-xs text-slate-400 mt-0.5">{doc.type}</p>
+                  <h4 className="text-sm font-bold text-slate-900 mt-3">{doc.name}</h4>
+                  <p className="text-xs text-slate-500 mt-0.5 font-medium">{doc.type}</p>
                   
-                  <div className="flex items-center justify-between text-[10px] text-slate-500 mt-4 border-t border-slate-800/80 pt-2">
+                  <div className="flex items-center justify-between text-[10px] text-slate-500 mt-4 border-t border-slate-100 pt-2 font-medium">
                     <span>Uploaded: {doc.uploadDate}</span>
                     <span>Size: {doc.size}</span>
                   </div>
@@ -307,18 +299,18 @@ export const CitizenDashboard: React.FC<CitizenDashboardProps> = ({ setActiveTab
         {/* View 3: Notifications Center */}
         {activeSubTab === 'notifications' && (
           <div className="space-y-3 max-w-3xl">
-            <h3 className="text-sm font-bold text-white mb-2">Government DBT Alerts & Direct Notifications</h3>
+            <h3 className="text-sm font-bold text-slate-900 mb-2">Government DBT Alerts & Direct Notifications</h3>
             {notifications.map((n) => (
-              <div key={n.id} className="bg-[#090D18] border border-slate-800 p-4 rounded-2xl flex items-start space-x-3">
-                <div className="p-2 rounded-xl bg-cyan-500/10 text-cyan-400 mt-0.5">
+              <div key={n.id} className="bg-white border border-slate-200 p-4 rounded-2xl flex items-start space-x-3 shadow-sm">
+                <div className="p-2 rounded-xl bg-blue-50 text-blue-600 mt-0.5 border border-blue-100">
                   <Bell className="w-5 h-5" />
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center justify-between">
-                    <h4 className="text-sm font-bold text-white">{n.title}</h4>
-                    <span className="text-[10px] text-slate-500">{n.time}</span>
+                    <h4 className="text-sm font-bold text-slate-900">{n.title}</h4>
+                    <span className="text-[10px] text-slate-500 font-medium">{n.time}</span>
                   </div>
-                  <p className="text-xs text-slate-300 mt-1">{n.desc}</p>
+                  <p className="text-xs text-slate-600 mt-1 font-medium">{n.desc}</p>
                 </div>
               </div>
             ))}
@@ -329,17 +321,17 @@ export const CitizenDashboard: React.FC<CitizenDashboardProps> = ({ setActiveTab
         {activeSubTab === 'saved' && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {MOCK_SCHEMES.slice(0, 3).map((sch) => (
-              <div key={sch.id} className="bg-[#090D18] border border-slate-800 p-5 rounded-2xl space-y-2">
+              <div key={sch.id} className="bg-white border border-slate-200 p-5 rounded-2xl space-y-2 shadow-sm">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-bold text-cyan-400 uppercase tracking-wider">{sch.category}</span>
-                  <span className="text-xs font-bold text-emerald-400 font-mono">{sch.benefitAmount}</span>
+                  <span className="text-[10px] font-bold text-blue-600 uppercase tracking-wider">{sch.category}</span>
+                  <span className="text-xs font-bold text-emerald-600 font-mono">{sch.benefitAmount}</span>
                 </div>
-                <h4 className="text-sm font-bold text-white">{sch.title}</h4>
-                <p className="text-xs text-slate-400 line-clamp-2">{sch.description}</p>
+                <h4 className="text-sm font-bold text-slate-900">{sch.title}</h4>
+                <p className="text-xs text-slate-600 line-clamp-2 font-medium">{sch.description}</p>
                 <div className="pt-2 flex justify-end">
                   <button 
                     onClick={() => setActiveTab('schemes')}
-                    className="px-3 py-1.5 rounded-lg bg-cyan-500/20 text-cyan-300 text-xs font-bold hover:bg-cyan-500/30"
+                    className="px-3 py-1.5 rounded-lg bg-blue-50 text-blue-700 border border-blue-100 text-xs font-bold hover:bg-blue-100"
                   >
                     View Scheme Info
                   </button>
