@@ -1,1 +1,0 @@
-# SathiX OS Frontend
