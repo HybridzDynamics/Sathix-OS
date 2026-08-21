@@ -1,0 +1,201 @@
+# Render Blueprint — SathiX-OS backend and internal services
+# Docs: https://render.com/docs/blueprint-spec
+
+services:
+  - type: web
+    name: sathix-backend
+    runtime: node
+    region: singapore
+    plan: starter
+    rootDir: backend
+    buildCommand: npm ci && npx prisma generate
+    startCommand: node src/server.js
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: sathix-postgres
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: INTERNAL_SERVICE_TOKEN
+        generateValue: true
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: sathix-redis
+          property: connectionString
+      - key: RAG_ENGINE_URL
+        fromService:
+          type: web
+          name: sathix-rag
+          property: hostport
+      - key: LANGUAGE_ENGINE_URL
+        fromService:
+          type: web
+          name: sathix-language
+          property: hostport
+      - key: VOICE_SERVICE_URL
+        fromService:
+          type: web
+          name: sathix-voice
+          property: hostport
+      - key: CORS_ALLOWED_ORIGINS
+        sync: false
+      - key: SUPER_ADMIN_MOBILE
+        sync: false
+      - key: SUPER_ADMIN_PASSWORD
+        sync: false
+
+  - type: web
+    name: sathix-rag
+    runtime: node
+    region: singapore
+    plan: starter
+    rootDir: rag-service
+    buildCommand: npm ci
+    startCommand: node src/index.js
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: sathix-postgres
+          property: connectionString
+      - key: INTERNAL_SERVICE_TOKEN
+        fromService:
+          type: web
+          name: sathix-backend
+          envVarKey: INTERNAL_SERVICE_TOKEN
+      - key: QDRANT_URL
+        sync: false
+      - key: QDRANT_API_KEY
+        sync: false
+      - key: VECTOR_STORE
+        value: qdrant
+      - key: EMBEDDING_PROVIDER
+        sync: false
+      - key: ANSWER_GENERATOR
+        sync: false
+
+  - type: worker
+    name: sathix-scraper-worker
+    runtime: node
+    region: singapore
+    plan: starter
+    rootDir: scraper-engine
+    buildCommand: npm ci && npx prisma generate
+    startCommand: node src/jobs/worker.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: sathix-postgres
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: sathix-redis
+          property: connectionString
+
+  - type: web
+    name: sathix-language
+    runtime: node
+    region: singapore
+    plan: starter
+    rootDir: language-engine
+    buildCommand: npm ci
+    startCommand: node src/index.js
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: INTERNAL_SERVICE_TOKEN
+        fromService:
+          type: web
+          name: sathix-backend
+          envVarKey: INTERNAL_SERVICE_TOKEN
+      - key: PYTHON_ML_SERVICE_URL
+        sync: false
+      - key: BACKEND_URL
+        fromService:
+          type: web
+          name: sathix-backend
+          property: hostport
+
+  - type: web
+    name: sathix-voice
+    runtime: node
+    region: singapore
+    plan: starter
+    rootDir: voice-service
+    buildCommand: npm ci
+    startCommand: node src/index.js
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: INTERNAL_SERVICE_TOKEN
+        fromService:
+          type: web
+          name: sathix-backend
+          envVarKey: INTERNAL_SERVICE_TOKEN
+      - key: BACKEND_URL
+        fromService:
+          type: web
+          name: sathix-backend
+          property: hostport
+      - key: LANGUAGE_ENGINE_URL
+        fromService:
+          type: web
+          name: sathix-language
+          property: hostport
+      - key: STT_INFERENCE_URL
+        sync: false
+      - key: TTS_INFERENCE_URL
+        sync: false
+
+  - type: web
+    name: sathix-whatsapp
+    runtime: node
+    region: singapore
+    plan: starter
+    rootDir: whatsapp-service
+    buildCommand: npm ci
+    startCommand: node src/index.js
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: BACKEND_URL
+        fromService:
+          type: web
+          name: sathix-backend
+          property: hostport
+      - key: INTERNAL_SERVICE_TOKEN
+        fromService:
+          type: web
+          name: sathix-backend
+          envVarKey: INTERNAL_SERVICE_TOKEN
+      - key: WHATSAPP_VERIFY_TOKEN
+        sync: false
+      - key: WHATSAPP_ACCESS_TOKEN
+        sync: false
+      - key: WHATSAPP_PHONE_NUMBER_ID
+        sync: false
+
+databases:
+  - name: sathix-postgres
+    plan: starter
+    region: singapore
+    databaseName: sathix
+    user: sathix
+
+  - name: sathix-redis
+    plan: starter
+    region: singapore
+    maxmemoryPolicy: allkeys-lru

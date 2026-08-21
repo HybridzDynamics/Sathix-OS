@@ -66,7 +66,26 @@ Each service contains a `.env.example` template:
 
 ---
 
-## 🚀 Running the Services
+## 🐳 Docker (recommended local stack)
+
+```bash
+cp .env.example .env
+# Edit .env — set JWT_SECRET and INTERNAL_SERVICE_TOKEN
+
+docker compose up --build
+```
+
+Core services started: PostgreSQL, Redis, Qdrant, Backend (`:5000`), RAG (`:3001`), Scraper worker.
+
+Optional profiles:
+
+```bash
+docker compose --profile language --profile voice --profile whatsapp up --build
+```
+
+---
+
+## 🚀 Running the Services (manual)
 
 ### 1. Synchronize Database Schema
 ```bash
@@ -88,7 +107,13 @@ npm start
 # Runs on http://localhost:5000
 ```
 
-### 4. Run Scraper Crawl
+### 4. Run Scraper Worker
+```bash
+cd scraper-engine
+npm run worker
+```
+
+### 5. Run Scraper Crawl (CLI)
 ```bash
 cd scraper-engine
 node src/index.js <target_url>
@@ -96,15 +121,22 @@ node src/index.js <target_url>
 
 ---
 
-## 🧪 Testing the Integration
+## 🧪 Testing
 
-### Run Unit & RAG Service Tests:
+Run all service tests locally:
+
 ```bash
-cd rag-service
-npm run test:integration
+cd backend && npm test
+cd rag-service && npm test
+cd language-engine && npm test
+cd voice-service && npm test
+cd whatsapp-service && npm test
+cd scraper-engine && npm test
 ```
 
-### Run Full End-to-End Pipeline Test:
+Or rely on GitHub Actions CI (`.github/workflows/ci.yml`) on push/PR.
+
+### Full End-to-End Pipeline Test:
 ```bash
 node scripts/test-e2e.js
 ```
@@ -113,9 +145,11 @@ node scripts/test-e2e.js
 
 ## 🔍 Key Endpoints
 
-- `GET /health` (Backend & RAG service health checks)
-- `POST /api/v1/ai/query` (Backend public stateless AI endpoint)
-- `POST /api/assistant/chat` (Backend authenticated citizen chat session)
-- `POST /rag/query` (RAG vector search & grounded response)
-- `POST /rag/ingest` (Single scheme vector ingestion)
-- `POST /rag/reindex` (Batch reindex all schemes from PostgreSQL)
+- `GET /health` — Backend & RAG health checks
+- `POST /api/rag/query` — Backend JWT-protected RAG query gateway
+- `POST /api/assistant/chat` — Authenticated citizen chat session
+- `POST /api/scraper/start` — Admin scraper job queue (JWT + ADMIN)
+- `GET /api/scraper/status` — Scraper queue status (JWT + ADMIN)
+- `POST /rag/query` — RAG vector search (internal service token)
+- `POST /rag/ingest` — Single scheme vector ingestion
+- `POST /rag/reindex` — Batch reindex from PostgreSQL

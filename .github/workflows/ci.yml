@@ -1,0 +1,127 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - run: npm ci
+      - run: npm test
+
+  rag-service:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: rag-service
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: rag-service/package-lock.json
+      - run: npm ci
+      - run: npm test
+
+  language-engine:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: language-engine
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: language-engine/package-lock.json
+      - run: npm ci
+      - run: npm test
+
+  voice-service:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: voice-service
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: voice-service/package-lock.json
+      - run: npm ci
+      - run: npm test
+
+  whatsapp-service:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: whatsapp-service
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: whatsapp-service/package-lock.json
+      - run: npm ci
+      - run: npm test
+
+  scraper-engine:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: scraper-engine
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: scraper-engine/package-lock.json
+      - run: npm ci
+      - run: npm test
+
+  admin-panel:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: admin-panel
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: admin-panel/package-lock.json
+      - run: npm ci
+      - run: npm run build
+
+  user-panel:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: user-panel
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: user-panel/package-lock.json
+      - run: npm ci
+      - run: npm run build

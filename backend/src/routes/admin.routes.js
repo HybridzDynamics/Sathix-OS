@@ -21,5 +21,14 @@ router.post('/scraper/jobs/:id/retry', authenticate, authorize(['ADMIN']), admin
 router.post('/scraper/jobs/:id/cancel', authenticate, authorize(['ADMIN']), adminController.cancelScraperJob);
 router.get('/rag/status', authenticate, authorize(['ADMIN']), adminController.ragStatus);
 router.post('/rag/reindex', authenticate, authorize(['ADMIN']), adminController.reindexAll);
+router.get('/logs', authenticate, authorize(['ADMIN']), adminController.listLogs);
+router.get('/analytics', authenticate, authorize(['ADMIN']), adminController.getAnalytics);
+router.get('/sources', authenticate, authorize(['ADMIN']), adminController.listSources);
+router.post('/sources', authenticate, authorize(['ADMIN']), adminController.createSource);
+router.delete('/sources/:id', authenticate, authorize(['ADMIN']), adminController.deleteSource);
+router.get('/approvals', authenticate, authorize(['ADMIN']), adminController.listApprovals);
+router.post('/approvals/:id/approve', authenticate, authorize(['ADMIN']), adminController.approveScheme);
+router.post('/approvals/:id/reject', authenticate, authorize(['ADMIN']), adminController.rejectScheme);
+router.get('/languages', authenticate, authorize(['ADMIN']), adminController.listLanguages);
 
 module.exports = router;

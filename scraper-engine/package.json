@@ -4,7 +4,9 @@
   "description": "Scraper engine for SathiX OS - crawler framework",
   "main": "src/index.js",
   "scripts": {
-    "start": "node src/index.js"
+    "start": "node src/index.js",
+    "worker": "node src/jobs/worker.js",
+    "test": "node --test tests/*.test.js"
   },
   "dependencies": {
     "@prisma/client": "^5.11.0",

@@ -3,6 +3,11 @@ const userService = require('../services/admin-user.service');
 const schemeService = require('../services/admin-scheme.service');
 const scraperService = require('../services/admin-scraper.service');
 const ragService = require('../services/admin-rag.service');
+const logsService = require('../services/admin-logs.service');
+const analyticsService = require('../services/admin-analytics.service');
+const sourcesService = require('../services/admin-sources.service');
+const approvalsService = require('../services/admin-approvals.service');
+const languagesService = require('../services/admin-languages.service');
 
 function getSession(req, res) {
   // Return only identity data required for the admin shell. Never return credentials.
@@ -48,5 +53,20 @@ async function retryScraperJob(req, res, next) { try { res.json({ job: await scr
 async function cancelScraperJob(req, res, next) { try { res.json({ job: await scraperService.cancelJob(req.app.locals.prisma, { id: req.params.id, actorId: req.user.id, requestId: req.headers['x-request-id'] || null }) }); } catch (error) { next(error); } }
 async function ragStatus(req, res, next) { try { res.json(await ragService.getStatus(req.app.locals.prisma)); } catch (error) { next(error); } }
 async function reindexAll(req, res, next) { try { res.json(await ragService.reindexAll(req.app.locals.prisma, { actorId: req.user.id, requestId: req.headers['x-request-id'] || null })); } catch (error) { next(error); } }
+async function listLogs(req, res, next) { try { res.json(await logsService.listLogs(req.app.locals.prisma, req.query)); } catch (error) { next(error); } }
+async function getAnalytics(req, res, next) { try { res.json(await analyticsService.getAnalytics(req.app.locals.prisma)); } catch (error) { next(error); } }
+async function listSources(req, res, next) { try { res.json(await sourcesService.listSources(req.app.locals.prisma, req.query)); } catch (error) { next(error); } }
+async function createSource(req, res, next) { try { res.status(201).json({ source: await sourcesService.createSource(req.app.locals.prisma, { url: req.body?.url, title: req.body?.title, state: req.body?.state, actorId: req.user.id, requestId: req.headers['x-request-id'] || null }) }); } catch (error) { next(error); } }
+async function deleteSource(req, res, next) { try { res.json({ source: await sourcesService.deleteSource(req.app.locals.prisma, { id: req.params.id, actorId: req.user.id, requestId: req.headers['x-request-id'] || null }) }); } catch (error) { next(error); } }
+async function listApprovals(req, res, next) { try { res.json(await approvalsService.listPending(req.app.locals.prisma, req.query)); } catch (error) { next(error); } }
+async function approveScheme(req, res, next) { try { res.json({ scheme: await approvalsService.approve(req.app.locals.prisma, { schemeId: req.params.id, actorId: req.user.id, requestId: req.headers['x-request-id'] || null }) }); } catch (error) { next(error); } }
+async function rejectScheme(req, res, next) { try { res.json({ scheme: await approvalsService.reject(req.app.locals.prisma, { schemeId: req.params.id, actorId: req.user.id, requestId: req.headers['x-request-id'] || null }) }); } catch (error) { next(error); } }
+async function listLanguages(req, res, next) { try { res.json(await languagesService.listLanguages()); } catch (error) { next(error); } }
 
-module.exports = { getSession, getOverview, listUsers, getUser, updateUserStatus, updateUserRole, listSchemes, updateSchemeStatus, reindexScheme, createScraperJob, listScraperJobs, scraperStatus, retryScraperJob, cancelScraperJob, ragStatus, reindexAll };
+module.exports = {
+  getSession, getOverview, listUsers, getUser, updateUserStatus, updateUserRole,
+  listSchemes, updateSchemeStatus, reindexScheme, createScraperJob, listScraperJobs,
+  scraperStatus, retryScraperJob, cancelScraperJob, ragStatus, reindexAll,
+  listLogs, getAnalytics, listSources, createSource, deleteSource,
+  listApprovals, approveScheme, rejectScheme, listLanguages
+};

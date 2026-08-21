@@ -1,0 +1,186 @@
+# SathiX-OS local development stack
+# Usage:
+#   cp .env.example .env
+#   docker compose up --build
+#
+# Optional ML/voice/WhatsApp stacks:
+#   docker compose --profile language --profile voice --profile whatsapp up --build
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-sathix}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-sathix_dev_password}
+      POSTGRES_DB: ${POSTGRES_DB:-sathix}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-sathix} -d ${POSTGRES_DB:-sathix}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  qdrant:
+    image: qdrant/qdrant:v1.12.5
+    ports:
+      - "${QDRANT_PORT:-6333}:6333"
+    volumes:
+      - qdrant_data:/qdrant/storage
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/127.0.0.1/6333'"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  backend:
+    build:
+      context: ./backend
+    ports:
+      - "${BACKEND_PORT:-5000}:5000"
+    env_file:
+      - .env
+    environment:
+      PORT: 5000
+      DATABASE_URL: postgresql://${POSTGRES_USER:-sathix}:${POSTGRES_PASSWORD:-sathix_dev_password}@postgres:5432/${POSTGRES_DB:-sathix}
+      REDIS_URL: redis://redis:6379
+      RAG_ENGINE_URL: http://rag-service:3001
+      LANGUAGE_ENGINE_URL: http://language-engine:4001
+      VOICE_SERVICE_URL: http://voice-service:4002
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:3000,http://localhost:5173,http://localhost:3001}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rag-service:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:5000/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  rag-service:
+    build:
+      context: ./rag-service
+    ports:
+      - "${RAG_PORT:-3001}:3001"
+    env_file:
+      - .env
+    environment:
+      PORT: 3001
+      DATABASE_URL: postgresql://${POSTGRES_USER:-sathix}:${POSTGRES_PASSWORD:-sathix_dev_password}@postgres:5432/${POSTGRES_DB:-sathix}
+      QDRANT_URL: http://qdrant:6333
+      VECTOR_STORE: ${VECTOR_STORE:-memory}
+      EMBEDDING_PROVIDER: ${EMBEDDING_PROVIDER:-none}
+      ANSWER_GENERATOR: ${ANSWER_GENERATOR:-noop}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      qdrant:
+        condition: service_started
+
+  scraper-worker:
+    build:
+      context: ./scraper-engine
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-sathix}:${POSTGRES_PASSWORD:-sathix_dev_password}@postgres:5432/${POSTGRES_DB:-sathix}
+      REDIS_URL: redis://redis:6379
+      WORKER_CONCURRENCY: ${SCRAPER_WORKER_CONCURRENCY:-2}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  language-engine:
+    profiles: ["language"]
+    build:
+      context: ./language-engine
+    ports:
+      - "${LANGUAGE_PORT:-4001}:4001"
+    environment:
+      PORT: 4001
+      PYTHON_ML_SERVICE_URL: http://language-engine-ml:8001
+      INTERNAL_SERVICE_TOKEN: ${INTERNAL_SERVICE_TOKEN}
+      BACKEND_URL: http://backend:5000
+    depends_on:
+      - language-engine-ml
+
+  language-engine-ml:
+    profiles: ["language"]
+    build:
+      context: ./language-engine/python
+    ports:
+      - "${LANGUAGE_ML_PORT:-8001}:8001"
+    environment:
+      PYTHON_ML_SERVICE_PORT: 8001
+
+  voice-service:
+    profiles: ["voice"]
+    build:
+      context: ./voice-service
+    ports:
+      - "${VOICE_PORT:-4002}:4002"
+    environment:
+      PORT: 4002
+      INTERNAL_SERVICE_TOKEN: ${INTERNAL_SERVICE_TOKEN}
+      LANGUAGE_ENGINE_URL: http://language-engine:4001
+      BACKEND_URL: http://backend:5000
+      STT_INFERENCE_URL: http://stt-inference:8002
+      TTS_INFERENCE_URL: http://tts-inference:8003
+    depends_on:
+      - stt-inference
+      - tts-inference
+
+  stt-inference:
+    profiles: ["voice"]
+    build:
+      context: ./voice-service/python/stt
+    ports:
+      - "${STT_PORT:-8002}:8002"
+
+  tts-inference:
+    profiles: ["voice"]
+    build:
+      context: ./voice-service/python/tts
+    ports:
+      - "${TTS_PORT:-8003}:8003"
+
+  whatsapp-service:
+    profiles: ["whatsapp"]
+    build:
+      context: ./whatsapp-service
+    ports:
+      - "${WHATSAPP_PORT:-4003}:4003"
+    environment:
+      PORT: 4003
+      BACKEND_URL: http://backend:5000
+      INTERNAL_SERVICE_TOKEN: ${INTERNAL_SERVICE_TOKEN}
+      WHATSAPP_VERIFY_TOKEN: ${WHATSAPP_VERIFY_TOKEN}
+      WHATSAPP_ACCESS_TOKEN: ${WHATSAPP_ACCESS_TOKEN}
+      WHATSAPP_PHONE_NUMBER_ID: ${WHATSAPP_PHONE_NUMBER_ID}
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  qdrant_data:

@@ -54,6 +54,8 @@ model User {
   email         String?          @unique
   passwordHash  String
   role          Role             @default(CITIZEN)
+  isActive      Boolean          @default(true)
+  lastActiveAt  DateTime?
   language      Language         @default(ENGLISH)
   profile       CitizenProfile?
   applications  Application[]

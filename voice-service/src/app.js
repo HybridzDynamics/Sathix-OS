@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const config = require('../config');
 const apiRouter = require('../api');
 const requestId = require('../middleware/requestId');
 const errorHandler = require('../middleware/errorHandler');
