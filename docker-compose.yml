@@ -1,14 +1,17 @@
-# SathiX-OS local development stack
-# Usage:
-#   cp .env.example .env
-#   docker compose up --build
-#
-# Optional ML/voice/WhatsApp stacks:
-#   docker compose --profile language --profile voice --profile whatsapp up --build
+# SathiX-OS — full stack, one container per service
+# Usage: cp .env.example .env && docker compose up --build
+
+name: sathix-os
+
+networks:
+  sathix:
+    driver: bridge
 
 services:
+  # ── Infrastructure ────────────────────────────────────────────
   postgres:
     image: postgres:16-alpine
+    networks: [sathix]
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-sathix}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-sathix_dev_password}
@@ -25,6 +28,7 @@ services:
 
   redis:
     image: redis:7-alpine
+    networks: [sathix]
     ports:
       - "${REDIS_PORT:-6379}:6379"
     healthcheck:
@@ -35,6 +39,7 @@ services:
 
   qdrant:
     image: qdrant/qdrant:v1.12.5
+    networks: [sathix]
     ports:
       - "${QDRANT_PORT:-6333}:6333"
     volumes:
@@ -46,140 +51,226 @@ services:
       retries: 5
       start_period: 10s
 
+  # ── Core API ────────────────────────────────────────────────
   backend:
     build:
       context: ./backend
+    networks: [sathix]
     ports:
       - "${BACKEND_PORT:-5000}:5000"
-    env_file:
-      - .env
+    env_file: [.env]
     environment:
       PORT: 5000
+      NODE_ENV: production
       DATABASE_URL: postgresql://${POSTGRES_USER:-sathix}:${POSTGRES_PASSWORD:-sathix_dev_password}@postgres:5432/${POSTGRES_DB:-sathix}
       REDIS_URL: redis://redis:6379
       RAG_ENGINE_URL: http://rag-service:3001
       LANGUAGE_ENGINE_URL: http://language-engine:4001
       VOICE_SERVICE_URL: http://voice-service:4002
-      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:3000,http://localhost:5173,http://localhost:3001}
+      WHATSAPP_SERVICE_URL: http://whatsapp-service:4003
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:3000,http://localhost:3100,http://localhost:5173}
     depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-      rag-service:
-        condition: service_started
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      rag-service: { condition: service_healthy }
+      language-engine: { condition: service_healthy }
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:5000/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
       interval: 20s
       timeout: 5s
       retries: 5
-      start_period: 30s
+      start_period: 40s
 
   rag-service:
     build:
       context: ./rag-service
+    networks: [sathix]
     ports:
       - "${RAG_PORT:-3001}:3001"
-    env_file:
-      - .env
+    env_file: [.env]
     environment:
       PORT: 3001
+      NODE_ENV: production
       DATABASE_URL: postgresql://${POSTGRES_USER:-sathix}:${POSTGRES_PASSWORD:-sathix_dev_password}@postgres:5432/${POSTGRES_DB:-sathix}
       QDRANT_URL: http://qdrant:6333
-      VECTOR_STORE: ${VECTOR_STORE:-memory}
-      EMBEDDING_PROVIDER: ${EMBEDDING_PROVIDER:-none}
+      VECTOR_STORE: qdrant
+      EMBEDDING_PROVIDER: ${EMBEDDING_PROVIDER:-local}
+      EMBEDDING_DIM: ${EMBEDDING_DIM:-384}
       ANSWER_GENERATOR: ${ANSWER_GENERATOR:-noop}
     depends_on:
-      postgres:
-        condition: service_healthy
-      qdrant:
-        condition: service_started
+      postgres: { condition: service_healthy }
+      qdrant: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3001/rag/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
 
   scraper-worker:
     build:
       context: ./scraper-engine
-    env_file:
-      - .env
+    networks: [sathix]
+    env_file: [.env]
     environment:
+      NODE_ENV: production
       DATABASE_URL: postgresql://${POSTGRES_USER:-sathix}:${POSTGRES_PASSWORD:-sathix_dev_password}@postgres:5432/${POSTGRES_DB:-sathix}
       REDIS_URL: redis://redis:6379
       WORKER_CONCURRENCY: ${SCRAPER_WORKER_CONCURRENCY:-2}
     depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
 
-  language-engine:
-    profiles: ["language"]
-    build:
-      context: ./language-engine
-    ports:
-      - "${LANGUAGE_PORT:-4001}:4001"
-    environment:
-      PORT: 4001
-      PYTHON_ML_SERVICE_URL: http://language-engine-ml:8001
-      INTERNAL_SERVICE_TOKEN: ${INTERNAL_SERVICE_TOKEN}
-      BACKEND_URL: http://backend:5000
-    depends_on:
-      - language-engine-ml
-
+  # ── Language Engine (Node + Python ML) ──────────────────────
   language-engine-ml:
-    profiles: ["language"]
     build:
       context: ./language-engine/python
+    networks: [sathix]
     ports:
       - "${LANGUAGE_ML_PORT:-8001}:8001"
     environment:
       PYTHON_ML_SERVICE_PORT: 8001
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"from urllib.request import urlopen; urlopen('http://127.0.0.1:8001/health').read()\""]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
 
-  voice-service:
-    profiles: ["voice"]
+  language-engine:
+    build:
+      context: ./language-engine
+    networks: [sathix]
+    ports:
+      - "${LANGUAGE_PORT:-4001}:4001"
+    env_file: [.env]
+    environment:
+      PORT: 4001
+      NODE_ENV: production
+      PYTHON_ML_SERVICE_URL: http://language-engine-ml:8001
+      BACKEND_URL: http://backend:5000
+    depends_on:
+      language-engine-ml: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:4001/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  # ── Voice (Node + STT + TTS inference) ──────────────────────
+  stt-inference:
     build:
       context: ./voice-service
+      dockerfile: python/stt/Dockerfile
+    networks: [sathix]
+    ports:
+      - "${STT_PORT:-8002}:8002"
+    environment:
+      STT_MODEL_PATH: ${STT_MODEL_PATH:-/models/faster-whisper-small}
+      STT_DEVICE: ${STT_DEVICE:-cpu}
+      STT_COMPUTE_TYPE: ${STT_COMPUTE_TYPE:-int8}
+    volumes:
+      - ${VOICE_MODEL_DIR:-./runtime-models}:/models:ro
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"from urllib.request import urlopen; urlopen('http://127.0.0.1:8002/health').read()\""]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 120s
+
+  tts-inference:
+    build:
+      context: ./voice-service
+      dockerfile: python/tts/Dockerfile
+    networks: [sathix]
+    ports:
+      - "${TTS_PORT:-8003}:8003"
+    environment:
+      TTS_MODEL_PATH: ${TTS_MODEL_PATH:-/models/piper-en-us-lessac.onnx}
+    volumes:
+      - ${VOICE_MODEL_DIR:-./runtime-models}:/models:ro
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"from urllib.request import urlopen; urlopen('http://127.0.0.1:8003/health').read()\""]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  voice-service:
+    build:
+      context: ./voice-service
+    networks: [sathix]
     ports:
       - "${VOICE_PORT:-4002}:4002"
+    env_file: [.env]
     environment:
       PORT: 4002
-      INTERNAL_SERVICE_TOKEN: ${INTERNAL_SERVICE_TOKEN}
+      NODE_ENV: production
+      STT_PROVIDER: python-http
+      TTS_PROVIDER: python-http
       LANGUAGE_ENGINE_URL: http://language-engine:4001
       BACKEND_URL: http://backend:5000
       STT_INFERENCE_URL: http://stt-inference:8002
       TTS_INFERENCE_URL: http://tts-inference:8003
     depends_on:
-      - stt-inference
-      - tts-inference
+      stt-inference: { condition: service_started }
+      tts-inference: { condition: service_started }
+      language-engine: { condition: service_healthy }
+      backend: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:4002/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
-  stt-inference:
-    profiles: ["voice"]
-    build:
-      context: ./voice-service/python/stt
-    ports:
-      - "${STT_PORT:-8002}:8002"
-
-  tts-inference:
-    profiles: ["voice"]
-    build:
-      context: ./voice-service/python/tts
-    ports:
-      - "${TTS_PORT:-8003}:8003"
-
+  # ── WhatsApp transport ──────────────────────────────────────
   whatsapp-service:
-    profiles: ["whatsapp"]
     build:
       context: ./whatsapp-service
+    networks: [sathix]
     ports:
       - "${WHATSAPP_PORT:-4003}:4003"
+    env_file: [.env]
     environment:
       PORT: 4003
+      NODE_ENV: production
       BACKEND_URL: http://backend:5000
-      INTERNAL_SERVICE_TOKEN: ${INTERNAL_SERVICE_TOKEN}
-      WHATSAPP_VERIFY_TOKEN: ${WHATSAPP_VERIFY_TOKEN}
-      WHATSAPP_ACCESS_TOKEN: ${WHATSAPP_ACCESS_TOKEN}
-      WHATSAPP_PHONE_NUMBER_ID: ${WHATSAPP_PHONE_NUMBER_ID}
+      WHATSAPP_DEV_MODE: ${WHATSAPP_DEV_MODE:-true}
     depends_on:
-      backend:
-        condition: service_healthy
+      backend: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:4003/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  # ── Frontends ───────────────────────────────────────────────
+  admin-panel:
+    build:
+      context: ./admin-panel
+      args:
+        NEXT_PUBLIC_BACKEND_URL: ${NEXT_PUBLIC_BACKEND_URL:-http://localhost:5000}
+    networks: [sathix]
+    ports:
+      - "${ADMIN_PANEL_PORT:-3100}:3000"
+    environment:
+      NEXT_PUBLIC_BACKEND_URL: ${NEXT_PUBLIC_BACKEND_URL:-http://localhost:5000}
+    depends_on:
+      backend: { condition: service_healthy }
+
+  user-panel:
+    build:
+      context: ./user-panel
+      args:
+        VITE_BACKEND_URL: ${VITE_BACKEND_URL:-http://localhost:5000}
+    networks: [sathix]
+    ports:
+      - "${USER_PANEL_PORT:-3000}:80"
+    depends_on:
+      backend: { condition: service_healthy }
 
 volumes:
   postgres_data:

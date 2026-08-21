@@ -7,7 +7,10 @@ function getProvider() {
     const Noop = require('./providers/noopProvider');
     return new Noop();
   }
-  // Future: load 'openai', 'hf' providers here dynamically
+  if (provider === 'local' || provider === 'local-hash') {
+    const LocalHash = require('./providers/localHashProvider');
+    return new LocalHash();
+  }
   throw new Error(`Unknown embedding provider: ${provider}`);
 }
 

@@ -25,6 +25,9 @@ function loadConfig() {
 }
 
 function validateRuntimeConfig(config) {
+  if (process.env.WHATSAPP_DEV_MODE === 'true') {
+    return config;
+  }
   ['accessToken', 'appSecret', 'verifyToken', 'phoneNumberId', 'internalToken'].forEach((key) => required({ accessToken: 'WHATSAPP_ACCESS_TOKEN', appSecret: 'WHATSAPP_APP_SECRET', verifyToken: 'WHATSAPP_VERIFY_TOKEN', phoneNumberId: 'WHATSAPP_PHONE_NUMBER_ID', internalToken: 'INTERNAL_SERVICE_TOKEN' }[key]));
   return config;
 }

@@ -66,22 +66,48 @@ Each service contains a `.env.example` template:
 
 ---
 
-## 🐳 Docker (recommended local stack)
+## 🐳 Docker — one container per service
+
+Every SathiX-OS component runs in its **own Docker container**:
+
+| Container | Port | Role |
+|-----------|------|------|
+| postgres | 5432 | Database |
+| redis | 6379 | Scraper queue |
+| qdrant | 6333 | Vector store |
+| backend | 5000 | API gateway |
+| rag-service | 3001 | RAG + Qdrant |
+| scraper-worker | — | BullMQ worker |
+| language-engine | 4001 | Language API |
+| language-engine-ml | 8001 | IndicTrans2 ML |
+| voice-service | 4002 | Voice orchestration |
+| stt-inference | 8002 | Speech-to-text |
+| tts-inference | 8003 | Text-to-speech |
+| whatsapp-service | 4003 | WhatsApp webhook |
+| admin-panel | 3100 | Admin UI |
+| user-panel | 3000 | Citizen UI |
+
+### Setup
 
 ```bash
 cp .env.example .env
-# Edit .env — set JWT_SECRET and INTERNAL_SERVICE_TOKEN
+# Edit JWT_SECRET, INTERNAL_SERVICE_TOKEN
+
+# Download voice models (required for STT/TTS containers)
+bash scripts/download-voice-models.sh   # or .\scripts\download-voice-models.ps1
 
 docker compose up --build
 ```
 
-Core services started: PostgreSQL, Redis, Qdrant, Backend (`:5000`), RAG (`:3001`), Scraper worker.
-
-Optional profiles:
+### Verify integration
 
 ```bash
-docker compose --profile language --profile voice --profile whatsapp up --build
+node scripts/verify-integration.js
 ```
+
+RAG uses **Qdrant** + **`EMBEDDING_PROVIDER=local`** (deterministic hash vectors — no API key needed in Docker).
+
+WhatsApp runs in **`WHATSAPP_DEV_MODE=true`** locally (set Meta credentials and `WHATSAPP_DEV_MODE=false` for production).
 
 ---
 

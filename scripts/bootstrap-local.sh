@@ -6,25 +6,32 @@ cd "$ROOT"
 
 if [[ ! -f .env ]]; then
   cp .env.example .env
-  echo "Created .env from .env.example — edit JWT_SECRET and INTERNAL_SERVICE_TOKEN before production use."
+  echo "Created .env — set JWT_SECRET and INTERNAL_SERVICE_TOKEN before production."
 fi
 
-echo "Starting SathiX-OS stack..."
-docker compose up --build -d postgres redis qdrant
+if [[ ! -d "${VOICE_MODEL_DIR:-$ROOT/runtime-models}/faster-whisper-small" ]]; then
+  echo "Voice models missing. Run: bash scripts/download-voice-models.sh"
+fi
 
-echo "Waiting for PostgreSQL..."
-until docker compose exec -T postgres pg_isready -U "${POSTGRES_USER:-sathix}" >/dev/null 2>&1; do sleep 2; done
+echo "Building and starting all SathiX-OS containers..."
+docker compose up --build -d
 
-echo "Applying database schema..."
-docker compose run --rm backend npx prisma db push --skip-generate
+echo "Waiting for Backend health..."
+until curl -sf http://localhost:${BACKEND_PORT:-5000}/health >/dev/null 2>&1; do sleep 3; done
 
-echo "Starting application services..."
-docker compose up --build -d backend rag-service scraper-worker
+echo "Running integration verification..."
+node scripts/verify-integration.js || true
 
-echo ""
-echo "SathiX-OS is starting:"
-echo "  Backend:  http://localhost:${BACKEND_PORT:-5000}"
-echo "  RAG:      http://localhost:${RAG_PORT:-3001}"
-echo ""
-echo "Optional profiles:"
-echo "  docker compose --profile language --profile voice --profile whatsapp up -d"
+cat <<EOF
+
+SathiX-OS containers:
+  Backend:       http://localhost:5000
+  RAG:           http://localhost:3001
+  Language:      http://localhost:4001
+  Voice:         http://localhost:4002
+  WhatsApp:      http://localhost:4003
+  Admin Panel:   http://localhost:3100
+  User Panel:    http://localhost:3000
+
+Verify: node scripts/verify-integration.js
+EOF

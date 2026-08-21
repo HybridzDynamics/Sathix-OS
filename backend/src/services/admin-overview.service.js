@@ -38,10 +38,11 @@ async function getOverview(prisma) {
   ]) : Array(10).fill(null);
   const [totalUsers, activeAccounts, totalSchemes, activeSchemes, indexedSchemes, totalApplications, aiQueries, scraperRuns, successfulScraperRuns, failedScraperRuns] = counts;
   const databaseMetric = (value) => database === 'healthy' ? tracked(value) : untracked('Database is unavailable.');
-  const [ragHealth, language, audio] = await Promise.all([
+  const [ragHealth, language, audio, whatsapp] = await Promise.all([
     probeRag(),
     probe(process.env.LANGUAGE_ENGINE_URL),
-    probe(process.env.VOICE_SERVICE_URL)
+    probe(process.env.VOICE_SERVICE_URL),
+    probe(process.env.WHATSAPP_SERVICE_URL)
   ]);
 
   return {
@@ -65,7 +66,7 @@ async function getOverview(prisma) {
       ragQueries: untracked('RAG query telemetry is not recorded by Backend.'),
       systemErrors: untracked('System error telemetry is not recorded.')
     },
-    services: { backend: 'healthy', database, scraper: 'not_monitored', rag: ragHealth.rag, qdrant: ragHealth.qdrant, language, audio }
+    services: { backend: 'healthy', database, scraper: 'not_monitored', rag: ragHealth.rag, qdrant: ragHealth.qdrant, language, audio, whatsapp }
   };
 }
 
