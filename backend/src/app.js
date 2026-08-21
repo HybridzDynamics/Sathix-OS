@@ -11,6 +11,7 @@ const adminRoutes = require('./routes/admin.routes');
 const healthRoutes = require('./routes/health.routes');
 const integrationRoutes = require('./routes/integration.routes');
 const internalRoutes = require('./routes/internal.routes');
+const { getSystemStatus } = require('./controllers/system');
 const { getHealth } = require('./controllers/health.controller');
 const { requestId } = require('./middleware/request-id');
 const { createRateLimiter } = require('./middleware/rate-limit');
@@ -64,6 +65,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/internal', internalRoutes);
 app.use('/api', integrationRoutes);
 app.use('/api', healthRoutes);
+app.get('/api/system/status', getSystemStatus);
 
 // Health check
 app.get('/health', getHealth);

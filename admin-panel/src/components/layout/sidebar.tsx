@@ -2,17 +2,18 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { 
-  LayoutDashboard, 
-  Users, 
-  FileText, 
-  CheckSquare, 
-  Activity, 
-  RefreshCw, 
-  TerminalSquare, 
-  Link as LinkIcon, 
-  Languages, 
-  BarChart3
+import {
+  LayoutDashboard,
+  Users,
+  FileText,
+  CheckSquare,
+  Activity,
+  RefreshCw,
+  TerminalSquare,
+  Link as LinkIcon,
+  Languages,
+  BarChart3,
+  Server
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -27,6 +28,7 @@ const navigation = [
   { name: 'Manage Sources', href: '/sources', icon: LinkIcon },
   { name: 'Manage Languages', href: '/languages', icon: Languages },
   { name: 'Analytics', href: '/analytics', icon: BarChart3 },
+  { name: 'System Status', href: '/status', icon: Server },
 ];
 
 export function Sidebar() {
@@ -35,8 +37,7 @@ export function Sidebar() {
   return (
     <div className="flex h-full w-64 flex-col bg-sidebar border-r border-sidebar-border">
       <div className="flex h-16 shrink-0 items-center px-6 border-b border-sidebar-border">
-        {/* Placeholder for Logo, since logo files were not provided in the directory */}
-        <span className="text-xl font-bold text-sidebar-primary">SarthixOS</span>
+        <span className="text-xl font-bold text-sidebar-primary">SathiX-OS</span>
       </div>
       <div className="flex flex-1 flex-col overflow-y-auto pt-4 pb-4">
         <nav className="flex-1 space-y-1 px-3">
@@ -55,7 +56,9 @@ export function Sidebar() {
               >
                 <item.icon
                   className={cn(
-                    isActive ? 'text-sidebar-primary-foreground' : 'text-muted-foreground group-hover:text-sidebar-accent-foreground',
+                    isActive
+                      ? 'text-sidebar-primary-foreground'
+                      : 'text-muted-foreground group-hover:text-sidebar-accent-foreground',
                     'mr-3 h-5 w-5 flex-shrink-0'
                   )}
                   aria-hidden="true"

@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ChatMessage, ActiveTab } from '../types';
-import { MOCK_CHAT_INITIAL, MOCK_AI_RESPONSES, MOCK_LANGUAGES } from '../data/mockData';
+import { MOCK_LANGUAGES } from '../data/mockData';
+import { chat as backendChat } from '../api/backend';
 import { 
   Bot, 
   Send, 
@@ -26,7 +27,12 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({
   activeLanguage,
   setActiveLanguage,
 }) => {
-  const [messages, setMessages] = useState<ChatMessage[]>(MOCK_CHAT_INITIAL);
+  const [messages, setMessages] = useState<ChatMessage[]>([{
+    id: 'msg-ai-init',
+    sender: 'ai',
+    text: "Namaste! I'm SathiX, your AI assistant for government schemes. Ask me anything about schemes, eligibility, or documents.",
+    timestamp: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })
+  }]);
   const [inputQuery, setInputQuery] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [isListening, setIsListening] = useState(false);
@@ -57,34 +63,25 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({
     if (!textToSend) setInputQuery('');
     setIsTyping(true);
 
-    // Simulate AI Response lookup
-    setTimeout(() => {
-      let responseKey = 'default';
-      const qLower = query.toLowerCase();
-
-      if (qLower.includes('eligible') || qLower.includes('qualify') || qLower.includes('scheme for me')) {
-        responseKey = 'eligible';
-      } else if (qLower.includes('scholarship') || qLower.includes('education') || qLower.includes('student')) {
-        responseKey = 'scholarship';
-      } else if (qLower.includes('document') || qLower.includes('paper') || qLower.includes('proof')) {
-        responseKey = 'documents';
-      } else if (qLower.includes('kisan') || qLower.includes('farmer') || qLower.includes('6000')) {
-        responseKey = 'pmkisan';
-      }
-
-      const match = MOCK_AI_RESPONSES[responseKey];
-      const aiMsg: ChatMessage = {
-        id: `msg-ai-${Date.now()}`,
-        sender: 'ai',
-        text: match.text,
-        timestamp: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }),
-        suggestedSchemes: match.schemes,
-        actionPrompts: match.actionPrompts
-      };
-
-      setMessages((prev) => [...prev, aiMsg]);
-      setIsTyping(false);
-    }, 1200);
+    backendChat(query, activeLanguage)
+      .then((res) => {
+        const aiMsg: ChatMessage = {
+          id: `msg-ai-${Date.now()}`,
+          sender: 'ai',
+          text: res.answer,
+          timestamp: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }),
+        };
+        setMessages((prev) => [...prev, aiMsg]);
+      })
+      .catch(() => {
+        setMessages((prev) => [...prev, {
+          id: `msg-ai-${Date.now()}`,
+          sender: 'ai',
+          text: 'Sorry, I could not reach the backend. Please try again.',
+          timestamp: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }),
+        }]);
+      })
+      .finally(() => setIsTyping(false));
   };
 
   // Simulate Voice Assistant Toggle
