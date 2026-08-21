@@ -1,0 +1,22 @@
+{
+  "name": "sathix-os",
+  "private": true,
+  "description": "SathiX-OS monorepo orchestration scripts",
+  "scripts": {
+    "test": "node scripts/run-all-tests.js",
+    "test:backend": "npm --prefix backend test",
+    "test:rag": "npm --prefix rag-service test",
+    "test:language": "npm --prefix language-engine test",
+    "test:voice": "npm --prefix voice-service test",
+    "test:whatsapp": "npm --prefix whatsapp-service test",
+    "test:scraper": "npm --prefix scraper-engine test",
+    "verify:integration": "node scripts/verify-integration.js",
+    "docker:up": "docker compose up --build -d",
+    "docker:down": "docker compose down",
+    "docker:logs": "docker compose logs -f",
+    "models:voice": "node scripts/download-voice-models.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

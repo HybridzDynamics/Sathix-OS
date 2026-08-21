@@ -45,24 +45,58 @@ async function probeRagQuery() {
 async function probeBackendDeps() {
   const url = process.env.BACKEND_URL || 'http://localhost:5000';
   try {
-    const response = await fetch(`${url}/api/health`, { signal: AbortSignal.timeout(5000) });
+    const response = await fetch(`${url}/api/ready`, { signal: AbortSignal.timeout(8000) });
     const body = await response.json().catch(() => ({}));
-    return { name: 'Backend service dependencies', ok: response.ok, status: response.status, detail: JSON.stringify(body.dependencies || {}) };
+    const deps = body.dependencies || body.services || {};
+    const ok = response.ok && !Object.values(deps).includes('error');
+    return { name: 'Backend /api/ready dependencies', ok, status: response.status, detail: JSON.stringify(deps) };
   } catch (error) {
-    return { name: 'Backend service dependencies', ok: false, status: 0, detail: error.message };
+    return { name: 'Backend /api/ready dependencies', ok: false, status: 0, detail: error.message };
   }
+}
+
+async function probeBackendGatewayRoutes() {
+  const url = process.env.BACKEND_URL || 'http://localhost:5000';
+  const routes = [
+    { name: 'Auth register route', path: '/api/auth/register', method: 'POST', expect: [400, 422] },
+    { name: 'Schemes route', path: '/api/schemes', method: 'GET', expect: [401] },
+    { name: 'Integration RAG gateway', path: '/api/rag/query', method: 'POST', expect: [401] },
+    { name: 'Internal voice route', path: '/api/internal/voice/query', method: 'POST', expect: [401, 403] },
+  ];
+  const results = [];
+  for (const route of routes) {
+    try {
+      const response = await fetch(`${url}${route.path}`, {
+        method: route.method,
+        headers: { 'Content-Type': 'application/json' },
+        body: route.method === 'POST' ? '{}' : undefined,
+        signal: AbortSignal.timeout(5000)
+      });
+      const ok = route.expect.includes(response.status);
+      results.push({ name: route.name, ok, status: response.status, detail: ok ? 'route reachable' : `unexpected ${response.status}` });
+    } catch (error) {
+      results.push({ name: route.name, ok: false, status: 0, detail: error.message });
+    }
+  }
+  return results;
 }
 
 async function main() {
   console.log('SathiX-OS Integration Verification\n');
-  const results = await Promise.all([...services.map(probe), probeRagQuery(), probeBackendDeps()]);
+  const gatewayRoutes = await probeBackendGatewayRoutes();
+  const results = await Promise.all([
+    ...services.map(probe),
+    probeRagQuery(),
+    probeBackendDeps()
+  ]);
+  const all = [...results, ...gatewayRoutes];
   let failed = 0;
-  for (const row of results) {
+  for (const row of all) {
     const mark = row.ok ? 'PASS' : 'FAIL';
     if (!row.ok) failed += 1;
     console.log(`[${mark}] ${row.name} (${row.status}) — ${row.detail}`);
   }
-  console.log(`\n${results.length - failed}/${results.length} checks passed`);
+  console.log(`\n${all.length - failed}/${all.length} checks passed`);
   process.exit(failed > 0 ? 1 : 0);
 }
 

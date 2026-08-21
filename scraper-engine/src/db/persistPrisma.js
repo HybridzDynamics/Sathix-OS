@@ -1,47 +1,58 @@
-const { getPrisma } = require('./prismaClient');
+const { Pool } = require('pg');
+
+let pool;
+function getPool() {
+  if (!pool) {
+    pool = new Pool({
+      connectionString: process.env.DATABASE_URL,
+      ssl: process.env.DATABASE_URL?.includes('sslmode=require') ? { rejectUnauthorized: false } : undefined
+    });
+  }
+  return pool;
+}
 
 /**
- * Prisma persistence adapter. Upserts a `Scheme` record using the `id` key.
- * Expects `record` to follow the canonical format produced by `processor/formatter`.
- * @module db/persistPrisma
- */
-
-/**
- * Save (upsert) a canonical record into Postgres via Prisma.
+ * Save (upsert) a canonical record into Postgres.
  * @param {object} record
  * @returns {Promise<object>} saved record
  */
 async function saveRecord(record) {
-  const prisma = getPrisma();
+  const p = getPool();
   
-  // Clean up object for Prisma to ensure we don't pass undefined where null is expected
-  const cleanData = {
-    id: record.id,
-    name: record.name,
-    description: record.description,
-    department: record.department,
-    category: record.category,
-    state: record.state,
-    eligibility: record.eligibility,
-    benefits: record.benefits,
-    documentsRequired: record.documentsRequired,
-    applicationLink: record.applicationLink,
-    sourceUrl: record.sourceUrl
-  };
+  const cleanData = [
+    record.id,
+    record.name,
+    record.description,
+    record.department || null,
+    record.category || null,
+    record.state || null,
+    record.eligibility || null,
+    record.benefits || null,
+    record.documentsRequired || null,
+    record.applicationLink || null,
+    record.sourceUrl || null
+  ];
 
-  // Use prisma.upsert to ensure idempotency
-  const saved = await prisma.scheme.upsert({
-    where: { id: cleanData.id },
-    update: {
-      ...cleanData,
-      updatedAt: new Date()
-    },
-    create: {
-      ...cleanData
-    }
-  });
+  const query = `
+    INSERT INTO "Scheme" (id, name, description, department, category, state, eligibility, benefits, "documentsRequired", "applicationLink", "sourceUrl", status, origin)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 'ACTIVE', 'SCRAPED')
+    ON CONFLICT (id) DO UPDATE SET
+      name = EXCLUDED.name,
+      description = EXCLUDED.description,
+      department = EXCLUDED.department,
+      category = EXCLUDED.category,
+      state = EXCLUDED.state,
+      eligibility = EXCLUDED.eligibility,
+      benefits = EXCLUDED.benefits,
+      "documentsRequired" = EXCLUDED."documentsRequired",
+      "applicationLink" = EXCLUDED."applicationLink",
+      "sourceUrl" = EXCLUDED."sourceUrl",
+      "updatedAt" = NOW()
+    RETURNING *;
+  `;
 
-  return saved;
+  const { rows } = await p.query(query, cleanData);
+  return rows[0];
 }
 
 module.exports = { saveRecord };

@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const db = require('../db');
 
 async function authenticate(req, res, next) {
   const authHeader = req.headers.authorization;
@@ -9,16 +10,9 @@ async function authenticate(req, res, next) {
   const token = authHeader.split(' ')[1];
   try {
     const payload = jwt.verify(token, process.env.JWT_SECRET);
-    const prisma = req.app?.locals?.prisma;
-    // Production requests verify current role/status from the database, so a
-    // stale JWT cannot retain access after a user is deactivated or demoted.
-    if (prisma) {
-      const user = await prisma.user.findUnique({ where: { id: payload.id }, select: { id: true, role: true, isActive: true } });
-      if (!user || !user.isActive) return res.status(401).json({ message: 'Account is inactive or unavailable' });
-      req.user = { id: user.id, role: user.role };
-    } else {
-      req.user = payload;
-    }
+    const user = await db.findUserAuthById(payload.id);
+    if (!user || !user.isActive) return res.status(401).json({ message: 'Account is inactive or unavailable' });
+    req.user = { id: user.id, role: user.role };
     next();
   } catch (error) {
     return res.status(401).json({ message: 'Invalid token' });

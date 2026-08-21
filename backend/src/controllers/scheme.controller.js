@@ -2,24 +2,16 @@ const schemeService = require('../services/scheme.service');
 
 const getSchemes = async (req, res, next) => {
   try {
-    const prisma = req.app.locals.prisma;
-    const schemes = await schemeService.listSchemes(prisma);
+    const schemes = await schemeService.listSchemes();
     res.json({ schemes });
-  } catch (error) {
-    next(error);
-  }
+  } catch (error) { next(error); }
 };
 
 const recommendSchemes = async (req, res, next) => {
   try {
-    const prisma = req.app.locals.prisma;
-    const userId = req.user.id;
-    const input = req.body;
-    const recommendations = await schemeService.recommendSchemes(prisma, userId, input);
+    const recommendations = await schemeService.recommend(req.user.id);
     res.json({ recommendations });
-  } catch (error) {
-    next(error);
-  }
+  } catch (error) { next(error); }
 };
 
 module.exports = { getSchemes, recommendSchemes };

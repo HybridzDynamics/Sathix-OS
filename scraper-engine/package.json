@@ -9,15 +9,14 @@
     "test": "node --test tests/*.test.js"
   },
   "dependencies": {
-    "@prisma/client": "^5.11.0",
     "axios": "^1.4.0",
     "cheerio": "^1.0.0-rc.12",
     "pdf-parse": "^1.1.1",
-    "puppeteer": "^21.0.0"
+    "puppeteer": "^21.0.0",
+    "knex": "^3.1.0",
+    "pg": "^8.11.5"
   },
-  "devDependencies": {
-    "prisma": "^5.11.0"
-  },
+  "devDependencies": {},
   "optionalDependencies": {
     "bullmq": "^2.14.0",
     "ioredis": "^5.3.2"

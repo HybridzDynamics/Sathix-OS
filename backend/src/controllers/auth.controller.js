@@ -1,71 +1,36 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const db = require('../db');
 
 const register = async (req, res, next) => {
   try {
-    const prisma = req.app.locals.prisma;
     const { name, mobile, email, password, language } = req.body;
-
     if (!name || !mobile || !password) {
       return res.status(400).json({ message: 'Name, mobile and password are required' });
     }
-
-    const existingUser = await prisma.user.findUnique({ where: { mobile } });
-    if (existingUser) {
-      return res.status(400).json({ message: 'Mobile already registered' });
-    }
-
+    const existingUser = await db.findUserByMobile(mobile);
+    if (existingUser) return res.status(400).json({ message: 'Mobile already registered' });
     const passwordHash = await bcrypt.hash(password, 10);
-    const user = await prisma.user.create({
-      data: {
-        name,
-        mobile,
-        email,
-        passwordHash,
-        language: language ? language.toUpperCase() : 'ENGLISH',
-      },
-    });
-
+    const user = await db.createUser({ name, mobile, email, passwordHash, language: language ? language.toUpperCase() : 'ENGLISH' });
     res.status(201).json({ id: user.id, name: user.name, mobile: user.mobile, role: user.role });
-  } catch (error) {
-    next(error);
-  }
+  } catch (error) { next(error); }
 };
 
 const login = async (req, res, next) => {
   try {
-    const prisma = req.app.locals.prisma;
     const { mobile, password } = req.body;
-
-    if (!mobile || !password) {
-      return res.status(400).json({ message: 'Mobile and password are required' });
+    if (!mobile || !password) return res.status(400).json({ message: 'Mobile and password are required' });
+    const user = await db.findUserByMobile(mobile);
+    if (!user) return res.status(401).json({ message: 'Invalid credentials' });
+    if (!(await bcrypt.compare(password, user.passwordHash))) return res.status(401).json({ message: 'Invalid credentials' });
+    if (!user.isActive) return res.status(403).json({ message: 'This account has been deactivated' });
+    await db.updateUser(user.id, { lastActiveAt: new Date() });
+    if (['ADMIN', 'SUPER_ADMIN'].includes(user.role)) {
+      await db.createAuditLog({ action: 'ADMIN_LOGIN', entity: 'User', entityId: user.id, details: JSON.stringify({ actorId: user.id, requestId: req.id }) }).catch(() => undefined);
     }
-
-    const user = await prisma.user.findUnique({ where: { mobile } });
-    if (!user) {
-      return res.status(401).json({ message: 'Invalid credentials' });
-    }
-
-    const passwordMatch = await bcrypt.compare(password, user.passwordHash);
-    if (!passwordMatch) {
-      return res.status(401).json({ message: 'Invalid credentials' });
-    }
-    if (!user.isActive) {
-      return res.status(403).json({ message: 'This account has been deactivated' });
-    }
-
-    await prisma.user.update({ where: { id: user.id }, data: { lastActiveAt: new Date() } });
-
-    if (['ADMIN', 'SUPER_ADMIN'].includes(user.role) && prisma.auditLog?.create) {
-      // Login auditing must never expose credentials or prevent an otherwise valid login.
-      await prisma.auditLog.create({ data: { action: 'ADMIN_LOGIN', entity: 'User', entityId: user.id, details: JSON.stringify({ actorId: user.id, requestId: req.id }) } }).catch(() => undefined);
-    }
-
     const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '7d' });
     res.json({ token, user: { id: user.id, name: user.name, mobile: user.mobile, role: user.role, language: user.language } });
-  } catch (error) {
-    next(error);
-  }
+  } catch (error) { next(error); }
 };
 
 module.exports = { register, login };
