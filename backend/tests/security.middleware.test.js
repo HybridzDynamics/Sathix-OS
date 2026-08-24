@@ -3,6 +3,7 @@ const assert = require('node:assert/strict');
 const jwt = require('jsonwebtoken');
 const { createRateLimiter } = require('../src/middleware/rate-limit');
 const { serviceAuth } = require('../../rag-service/src/middleware/serviceAuth');
+const { installAuthMocks, restoreAuthMocks } = require('./helpers/auth-mocks');
 
 process.env.JWT_SECRET = 'test-admin-secret';
 const app = require('../src/app');
@@ -19,12 +20,16 @@ function response() {
 }
 
 test.before(async () => {
+  installAuthMocks();
   server = app.listen(0);
   await new Promise((resolve) => server.once('listening', resolve));
   baseUrl = `http://127.0.0.1:${server.address().port}`;
 });
 
-test.after(() => new Promise((resolve) => server.close(resolve)));
+test.after(async () => {
+  await new Promise((resolve) => server.close(resolve));
+  restoreAuthMocks();
+});
 
 test('every API response receives a server-controlled request ID', async () => {
   const result = await fetch(`${baseUrl}/api/admin/session`, { headers: { 'x-request-id': '<script>alert(1)</script>' } });
@@ -46,13 +51,13 @@ test('the documented user-panel deployment origin is allowed by default', async 
 });
 
 test('database role lookup overrides a stale admin token', async () => {
-  app.locals.prisma = { user: { findUnique: async () => ({ id: 'user-1', role: 'CITIZEN', isActive: true }) } };
   try {
     const token = jwt.sign({ id: 'user-1', role: 'ADMIN' }, process.env.JWT_SECRET);
     const result = await fetch(`${baseUrl}/api/admin/session`, { headers: { Authorization: `Bearer ${token}` } });
     assert.equal(result.status, 403);
   } finally {
-    delete app.locals.prisma;
+    restoreAuthMocks();
+    installAuthMocks();
   }
 });
 

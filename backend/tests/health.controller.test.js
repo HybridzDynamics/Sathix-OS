@@ -1,28 +1,36 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const axios = require('axios');
+const db = require('../src/db');
 const { getHealth } = require('../src/controllers/health.controller');
 
 test('API health response reports backend, database, and RAG status without secrets', async () => {
   const originalGet = axios.get;
+  const originalPing = db.ping;
   axios.get = async () => ({ status: 200 });
+  db.ping = async () => undefined;
   try {
     let status; let body;
     const res = { status: (code) => { status = code; return res; }, json: (data) => { body = data; } };
-    await getHealth({ app: { locals: { prisma: { $queryRaw: async () => [{ ok: 1 }] } } }, path: '/health' }, res);
+    await getHealth({ path: '/health' }, res);
     assert.equal(status, 200);
     assert.deepEqual(body.services, { backend: 'ok', database: 'ok', rag: 'ok' });
-  } finally { axios.get = originalGet; }
+  } finally {
+    axios.get = originalGet;
+    db.ping = originalPing;
+  }
 });
 
 test('ready endpoint reports downstream dependencies including WhatsApp', async () => {
   const originalGet = axios.get;
+  const originalPing = db.ping;
   process.env.WHATSAPP_SERVICE_URL = 'http://whatsapp.test';
   axios.get = async (url) => {
     if (String(url).includes('whatsapp.test')) return { status: 200 };
     if (String(url).includes('/rag/health')) return { status: 200 };
     throw new Error(`unexpected url ${url}`);
   };
+  db.ping = async () => undefined;
   const language = require('../src/integrations/language.client');
   const voice = require('../src/integrations/voice.client');
   const originalLanguageHealth = language.health;
@@ -35,13 +43,14 @@ test('ready endpoint reports downstream dependencies including WhatsApp', async 
   try {
     let body;
     const res = { status: () => res, json: (data) => { body = data; } };
-    await getHealth({ app: { locals: { prisma: { $queryRaw: async () => [{ ok: 1 }] } } }, path: '/ready' }, res);
+    await getHealth({ path: '/ready' }, res);
     assert.equal(body.dependencies.language, 'ok');
     assert.equal(body.dependencies.voice, 'ok');
     assert.equal(body.dependencies.whatsapp, 'ok');
     assert.equal(body.dependencies.scraper, 'ok');
   } finally {
     axios.get = originalGet;
+    db.ping = originalPing;
     language.health = originalLanguageHealth;
     voice.health = originalVoiceHealth;
     scraperQueue.counts = originalCounts;

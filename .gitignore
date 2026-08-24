@@ -1,3 +1,4 @@
 .env
+.runtime/
 runtime-models/
 node_modules/

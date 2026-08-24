@@ -15,6 +15,7 @@ const { getSystemStatus } = require('./controllers/system');
 const { getHealth } = require('./controllers/health.controller');
 const { requestId } = require('./middleware/request-id');
 const { createRateLimiter } = require('./middleware/rate-limit');
+const { securityHeaders } = require('./middleware/security-headers');
 
 const app = express();
 
@@ -28,6 +29,7 @@ const allowedOrigins = (process.env.CORS_ALLOWED_ORIGINS || [
   .split(',').map((origin) => origin.trim()).filter(Boolean);
 
 app.disable('x-powered-by');
+app.use(securityHeaders);
 app.use(requestId);
 app.use(cors({
   origin(origin, callback) {
