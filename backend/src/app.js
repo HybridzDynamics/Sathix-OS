@@ -23,7 +23,8 @@ const allowedOrigins = (process.env.CORS_ALLOWED_ORIGINS || [
   'https://sathix-os-admin.vercel.app',
   'https://sathix-os-1.onrender.com/',
   'https://sathix-os-user.vercel.app',
-  'https://sathix-os-languageengine.onrender.com'
+  'https://sathix-os-languageengine.onrender.com',
+  'http://localhost:3000/'
 
 ].join(','))
   .split(',').map((origin) => origin.trim()).filter(Boolean);
